@@ -27,10 +27,12 @@ public class ContaService {
         return idConta; 
     }
     
-    public void handle(SolicitacaoAumentoLimiteEmergencial cmd) {
+    public void handle(SolicitacaoAumentoLimiteEmergencial cmd) throws Exception {
         Conta conta = repository.getOne(cmd.getIdConta());
-        
-        conta.aumentarLimite();
+                
+        if (!conta.aumentarLimite()) {
+            throw new Exception("Só é permitido a solicitação de crédito emergencial uma vez");
+        }
         
         repository.save(conta);
     }

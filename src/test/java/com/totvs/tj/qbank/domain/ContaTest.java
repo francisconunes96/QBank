@@ -80,10 +80,9 @@ public class ContaTest {
     }
 
     @Test
-    public void aoSolicitarAumentoLimiteEmergencialTest() {
+    public void aoSolicitarAumentoLimiteEmergencialTest() throws Exception {
 
         //GIVEN
-
         ContaId idConta = ContaId.generate();
 
         Empresa empresa = Empresa.builder()
@@ -114,8 +113,42 @@ public class ContaTest {
         service.handle(cmd);
 
         // THEN
-        assertTrue(repository.getOne(idConta).getLimite().equals(limiteAntigo.add(limiteAntigo.divide(BigDecimal.valueOf(2)))));
+        assertTrue(repository.getOne(idConta).getLimiteEmergencial().equals(limiteAntigo.divide(BigDecimal.valueOf(2))));
     }
+    
+    @Test(expected = Exception.class)
+    public void aoSolicitarAumentoLimiteEmergencialMaisDeUmaVezDeveSerNegadoTest() throws Exception {
+        
+        //GIVEN
+        ContaId idConta = ContaId.generate();
+
+        Empresa empresa = Empresa.builder()
+                .id(EmpresaId.generate())
+                .cnpj(CNPJ.of("11057774000175"))
+                .nome("TOTVS")
+                .responsavel(ResponsavelId.generate())
+                .valorMercado(BigDecimal.valueOf(10000))
+                .quantidadeFuncionarios(2)
+                .build();
+
+        Conta conta = Conta.builder()
+                .id(idConta)
+                .empresa(empresa)
+                .calcularLimite()
+                .build();
+        
+        SolicitacaoAumentoLimiteEmergencial cmd = SolicitacaoAumentoLimiteEmergencial.from(idConta);
+
+        ContaRepository repository = new ContaRepositoryMock();
+        ContaService service = new ContaService(repository);
+
+        repository.save(conta);
+        service.handle(cmd);
+
+        // WHEN
+        SolicitacaoAumentoLimiteEmergencial cmdSegundaVez = SolicitacaoAumentoLimiteEmergencial.from(idConta);
+        service.handle(cmdSegundaVez);        
+    }   
     
     @Test
     public void aoSuspenderContaExistenteTest() {

@@ -16,11 +16,16 @@ public class Conta {
     private final EmpresaId empresa;
     private BigDecimal saldo;
     private BigDecimal limite;
+    private BigDecimal limiteEmergencial;
     private Situacao situacao;
     
     public boolean aumentarLimite() {
         
-        this.limite = this.limite.add(this.limite.divide(BigDecimal.valueOf(2)));
+        if (this.limiteEmergencial.compareTo(BigDecimal.ZERO) == 1) {
+            return false;
+        }
+        
+        this.limiteEmergencial = this.limite.divide(BigDecimal.valueOf(2));
         
         return true;
     }
@@ -43,7 +48,6 @@ public class Conta {
         
         private ContaId id;
         private Empresa empresa;
-        private BigDecimal saldo = BigDecimal.ZERO;
         private BigDecimal limite;
         
         public Builder id(ContaId id) {
@@ -67,7 +71,7 @@ public class Conta {
         }
         
         public Conta build() {                       
-            return new Conta(id, empresa.getId(), saldo, limite, Situacao.DISPONIVEL);
+            return new Conta(id, empresa.getId(), BigDecimal.ZERO, limite, BigDecimal.ZERO, Situacao.DISPONIVEL);
         }       
         
     }
