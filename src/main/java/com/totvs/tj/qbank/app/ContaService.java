@@ -46,4 +46,8 @@ public class ContaService {
         repository.save(conta);
     }
     
+    public boolean handle(SolicitacaoVerificacaoSaldo cmd) {
+        Conta conta = cmd.getConta();
+        return conta.estaDentroDoLimite(cmd.getValor());
+    }
 }
