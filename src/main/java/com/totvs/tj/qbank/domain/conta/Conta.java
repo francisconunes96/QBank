@@ -16,12 +16,23 @@ public class Conta {
     private final EmpresaId empresa;
     private BigDecimal saldo;
     private BigDecimal limite;
+    private Situacao situacao;
     
     public boolean aumentarLimite() {
         
         this.limite = this.limite.add(this.limite.divide(BigDecimal.valueOf(2)));
         
         return true;
+    }
+    
+    public void suspender() {
+        
+        this.situacao = Situacao.SUSPENSA;
+        
+    }
+    
+    public boolean isDisponivel() {
+        return Situacao.DISPONIVEL.equals(this.situacao);
     }
     
     public static Builder builder() {
@@ -56,10 +67,13 @@ public class Conta {
         }
         
         public Conta build() {                       
-            return new Conta(id, empresa.getId(), saldo, limite);
+            return new Conta(id, empresa.getId(), saldo, limite, Situacao.DISPONIVEL);
         }       
         
     }
     
-    
+    public static enum Situacao {
+        DISPONIVEL,
+        SUSPENSA
+    }
 }

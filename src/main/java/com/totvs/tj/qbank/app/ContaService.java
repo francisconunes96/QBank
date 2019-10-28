@@ -34,5 +34,14 @@ public class ContaService {
         
         repository.save(conta);
     }
+
+    public void handle(SuspenderConta cmd) {
+        
+        Conta conta = repository.getOne(cmd.getConta());
+        
+        conta.suspender();     
+        
+        repository.save(conta);
+    }
     
 }

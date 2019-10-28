@@ -1,6 +1,7 @@
 package com.totvs.tj.qbank.domain;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,6 +14,7 @@ import org.junit.Test;
 import com.totvs.tj.qbank.app.ContaService;
 import com.totvs.tj.qbank.app.SolicitacaoAberturaConta;
 import com.totvs.tj.qbank.app.SolicitacaoAumentoLimiteEmergencial;
+import com.totvs.tj.qbank.app.SuspenderConta;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
@@ -113,6 +115,42 @@ public class ContaTest {
 
         // THEN
         assertTrue(repository.getOne(idConta).getLimite().equals(limiteAntigo.add(limiteAntigo.divide(BigDecimal.valueOf(2)))));
+    }
+    
+    @Test
+    public void aoSuspenderContaExistenteTest() {
+        
+        //GIVEN
+        ContaId idConta = ContaId.generate();
+
+        Empresa empresa = Empresa.builder()
+                .id(EmpresaId.generate())
+                .cnpj(CNPJ.of("11057774000175"))
+                .nome("TOTVS")
+                .responsavel(ResponsavelId.generate())
+                .valorMercado(BigDecimal.valueOf(10000))
+                .quantidadeFuncionarios(2)
+                .build();
+
+        Conta conta = Conta.builder()
+                .id(idConta)
+                .empresa(empresa)
+                .calcularLimite()
+                .build();
+        
+        SuspenderConta cmd = SuspenderConta.from(idConta);
+        
+        ContaRepository repository = new ContaRepositoryMock();
+        ContaService service = new ContaService(repository);
+
+        repository.save(conta);
+        
+        //WHEN
+        service.handle(cmd);
+        
+        //THEN
+        assertFalse(repository.getOne(idConta).isDisponivel());
+        
     }
 
     static class ContaRepositoryMock implements ContaRepository {
