@@ -4,4 +4,5 @@ public interface ContaRepository {
 
     void save(Conta conta);
     
+    Conta getOne(ContaId id);
 }

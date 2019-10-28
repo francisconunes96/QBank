@@ -14,8 +14,15 @@ public class Conta {
     
     private final ContaId id;
     private final EmpresaId empresa;
-    private final BigDecimal saldo;
-    private final BigDecimal limite;
+    private BigDecimal saldo;
+    private BigDecimal limite;
+    
+    public boolean aumentarLimite() {
+        
+        this.limite = this.limite.add(this.limite.divide(BigDecimal.valueOf(2)));
+        
+        return true;
+    }
     
     public static Builder builder() {
         return new Builder();

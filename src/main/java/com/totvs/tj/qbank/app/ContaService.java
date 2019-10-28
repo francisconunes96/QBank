@@ -27,4 +27,12 @@ public class ContaService {
         return idConta; 
     }
     
+    public void handle(SolicitacaoAumentoLimiteEmergencial cmd) {
+        Conta conta = repository.getOne(cmd.getIdConta());
+        
+        conta.aumentarLimite();
+        
+        repository.save(conta);
+    }
+    
 }
