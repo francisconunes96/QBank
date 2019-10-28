@@ -1,4 +1,4 @@
-package com.totvs.tj.tcc;
+package com.totvs.tj.qbank;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
