@@ -73,7 +73,7 @@ public class Conta {
     }
 
     private BigDecimal vinteCincoPorcentoPossivelDebitar() {
-        return valorLimiteDisponivelParaSaida().multiply(VINTE_CINCO_PORCENTO, new MathContext(4,RoundingMode.HALF_EVEN));
+        return valorLimiteDisponivelParaSaida().multiply(VINTE_CINCO_PORCENTO);
     }
 
     private BigDecimal valorLimiteDisponivelParaSaida() {
