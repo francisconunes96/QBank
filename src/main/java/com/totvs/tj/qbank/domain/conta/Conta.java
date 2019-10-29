@@ -1,6 +1,8 @@
 package com.totvs.tj.qbank.domain.conta;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
@@ -11,7 +13,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class Conta {
-    private static final BigDecimal VINTE_CINCO_PORCENTO = BigDecimal.valueOf(25).multiply(BigDecimal.valueOf(100));
+    private static final BigDecimal VINTE_CINCO_PORCENTO = BigDecimal.valueOf(25).divide(BigDecimal.valueOf(100));
     private final ContaId id;
     private final EmpresaId empresa;
     private BigDecimal saldo;
@@ -40,6 +42,11 @@ public class Conta {
         this.saldo = this.saldo.add(valorCredito);
         return true;
     }
+    
+    public boolean debitar(BigDecimal valorDebito) {
+        this.saldo = this.saldo.subtract(valorDebito);
+        return true;
+    }
 
     public boolean estaDentroDoLimite(BigDecimal valorSaida) {
         return verificaLimite(valorSaida);
@@ -53,12 +60,20 @@ public class Conta {
         return valorPossivelDebitar().subtract(valorSaida).compareTo(BigDecimal.ZERO) >= 0;
     }
 
-    private BigDecimal valorPossivelDebitar() {
-        return vinteCincoPorcentoPossivelDebitar().add(this.saldo);
+    private BigDecimal valorPossivelDebitar() {       
+        return vinteCincoPorcentoPossivelDebitar().add(saldoCorrente());        
+    }
+    
+    private BigDecimal saldoCorrente() {
+        return verificaSeTemSaldo() ? this.saldo : BigDecimal.ZERO; 
+    }
+    
+    private boolean verificaSeTemSaldo() {
+        return this.saldo.compareTo(BigDecimal.ZERO) == 1;
     }
 
     private BigDecimal vinteCincoPorcentoPossivelDebitar() {
-        return valorLimiteDisponivelParaSaida().divide(VINTE_CINCO_PORCENTO);
+        return valorLimiteDisponivelParaSaida().multiply(VINTE_CINCO_PORCENTO, new MathContext(4,RoundingMode.HALF_EVEN));
     }
 
     private BigDecimal valorLimiteDisponivelParaSaida() {
@@ -70,11 +85,11 @@ public class Conta {
     }
 
     private BigDecimal valorLimiteDisponivel() {
-        return getLimiteTotal().subtract(this.saldo);
+        return getLimiteTotal().subtract(this.saldo.negate());
     }
 
-    private boolean verificaSeContemSaldoParaOperacaoSemUtilizarLimite(BigDecimal valor) {
-        return this.saldo.subtract(valor).compareTo(BigDecimal.ZERO) >= 0;
+    private boolean verificaSeContemSaldoParaOperacaoSemUtilizarLimite(BigDecimal valorSaida) {
+        return this.saldo.subtract(valorSaida).compareTo(BigDecimal.ZERO) >= 0;
     }
 
     public BigDecimal getLimiteTotal() {
