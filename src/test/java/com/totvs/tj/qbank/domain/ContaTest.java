@@ -21,7 +21,6 @@ import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.documento.CNPJ;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
-import com.totvs.tj.qbank.domain.empresa.ResponsavelId;
 
 public class ContaTest {
 
@@ -32,7 +31,7 @@ public class ContaTest {
                 .id(EmpresaId.generate())
                 .cnpj(CNPJ.of("11057774000175"))
                 .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
+                .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
                 .quantidadeFuncionarios(2)
                 .build();
@@ -60,7 +59,7 @@ public class ContaTest {
                 .id(EmpresaId.generate())
                 .cnpj(CNPJ.of("11057774000175"))
                 .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
+                .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
                 .quantidadeFuncionarios(2)
                 .build();
@@ -89,7 +88,7 @@ public class ContaTest {
                 .id(EmpresaId.generate())
                 .cnpj(CNPJ.of("11057774000175"))
                 .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
+                .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
                 .quantidadeFuncionarios(2)
                 .build();
@@ -126,7 +125,7 @@ public class ContaTest {
                 .id(EmpresaId.generate())
                 .cnpj(CNPJ.of("11057774000175"))
                 .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
+                .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
                 .quantidadeFuncionarios(2)
                 .build();
@@ -153,14 +152,14 @@ public class ContaTest {
     @Test
     public void aoSuspenderContaExistenteTest() {
         
-        //GIVEN
+        //GIVEN        
         ContaId idConta = ContaId.generate();
 
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
                 .cnpj(CNPJ.of("11057774000175"))
                 .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
+                .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
                 .quantidadeFuncionarios(2)
                 .build();
@@ -169,7 +168,7 @@ public class ContaTest {
                 .id(idConta)
                 .empresa(empresa)
                 .calcularLimite()
-                .build();
+                .build();        
         
         SuspenderConta cmd = SuspenderConta.from(idConta);
         

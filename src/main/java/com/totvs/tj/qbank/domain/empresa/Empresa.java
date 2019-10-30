@@ -13,7 +13,7 @@ import lombok.Getter;
 @Builder
 public class Empresa {
     
-    private ResponsavelId responsavel;
+    private String responsavel;
     private EmpresaId id;
     private String nome;
     private CNPJ cnpj;
