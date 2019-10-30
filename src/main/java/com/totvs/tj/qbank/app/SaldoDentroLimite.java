@@ -6,9 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor(staticName = "of")
-public class SolicitacaoVerificacaoSaldo {
-
-    private Movimento movimento;
+@AllArgsConstructor(staticName = "from")
+public class SaldoDentroLimite implements ResultadoVerificacaoSaldo {
     
+    private Movimento movimento;    
 }

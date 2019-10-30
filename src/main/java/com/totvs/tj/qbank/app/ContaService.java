@@ -3,51 +3,69 @@ package com.totvs.tj.qbank.app;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
+import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 
 public class ContaService {
-    
+
     private ContaRepository repository;
-    
+
     public ContaService(ContaRepository repository) {
         this.repository = repository;
     }
-    
+
     public ContaId handle(SolicitacaoAberturaConta cmd) {
-        
+
         ContaId idConta = ContaId.generate();
-        
+
         Conta conta = Conta.builder()
                 .id(idConta)
                 .empresa(cmd.getEmpresa())
                 .calcularLimite()
-            .build();
-        
+                .build();
+
         repository.save(conta);
-        
-        return idConta; 
+
+        return idConta;
     }
-    
+
     public void handle(SolicitacaoAumentoLimiteEmergencial cmd) throws Exception {
         Conta conta = repository.getOne(cmd.getIdConta());
-                
+
         if (!conta.aumentarLimite()) {
             throw new Exception("Só é permitido a solicitação de crédito emergencial uma vez");
         }
-        
+
         repository.save(conta);
     }
 
     public void handle(SuspenderConta cmd) {
-        
+
         Conta conta = repository.getOne(cmd.getConta());
-        
-        conta.suspender();     
-        
+
+        conta.suspender();
+
         repository.save(conta);
     }
-    
-    public boolean handle(SolicitacaoVerificacaoSaldo cmd) {
-        Conta conta = cmd.getConta();
-        return conta.estaDentroDoLimite(cmd.getValor());
+
+    public ResultadoVerificacaoSaldo handle(SolicitacaoVerificacaoSaldo cmd) {
+        Movimento movimento = cmd.getMovimento();        
+        Conta conta = movimento.getConta();
+
+        if (conta.estaDentroDoLimite(movimento.getValor())) {
+            return SaldoDentroLimite.from(movimento);
+        }
+
+        return SaldoExcedido.from(movimento);
+    }
+
+    public Movimento handle(SolicitacaoAprovacaoGerente cmd) {
+        
+        Movimento movimento = cmd.getMovimento();
+        
+        if (cmd.isAprovada()) {
+            movimento.aprovar();
+        }
+        
+        return movimento;
     }
 }

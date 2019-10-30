@@ -1,6 +1,6 @@
 package com.totvs.tj.qbank.domain;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
@@ -10,6 +10,10 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.totvs.tj.qbank.app.ContaService;
+import com.totvs.tj.qbank.app.ResultadoVerificacaoSaldo;
+import com.totvs.tj.qbank.app.SaldoDentroLimite;
+import com.totvs.tj.qbank.app.SaldoExcedido;
+import com.totvs.tj.qbank.app.SolicitacaoAprovacaoGerente;
 import com.totvs.tj.qbank.app.SolicitacaoVerificacaoSaldo;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
@@ -18,6 +22,8 @@ import com.totvs.tj.qbank.domain.documento.CNPJ;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.empresa.ResponsavelId;
+import com.totvs.tj.qbank.domain.movimentacao.Movimento;
+import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 
 public class MovimentacaoTest {
 
@@ -41,17 +47,25 @@ public class MovimentacaoTest {
                 .build();
 
         conta.creditar(BigDecimal.valueOf(2000));
+        
+        Movimento movimentoSaida = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoSaida()
+                .conta(conta)
+                .valor(BigDecimal.valueOf(1000))
+                .build();        
 
-        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(conta, BigDecimal.valueOf(1000));
+        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
         ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
 
         //When
-        boolean estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
 
         //Then      
-        assertTrue(estaNoLimite);
+        assertNotNull(estaNoLimite);
+        assertTrue(estaNoLimite instanceof SaldoDentroLimite);
     }
 
     @Test
@@ -75,18 +89,26 @@ public class MovimentacaoTest {
                 .calcularLimite()
                 .build();
 
-        conta.debitar(BigDecimal.valueOf(1000));
+        conta.debitar(BigDecimal.valueOf(1000));        
 
-        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(conta, BigDecimal.valueOf(1000));
+        Movimento movimentoSaida = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoSaida()
+                .conta(conta)
+                .valor(BigDecimal.valueOf(1000))
+                .build();  
+
+        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
         ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
 
         //When
-        boolean estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
 
         //Then      
-        assertTrue(estaNoLimite);
+        assertNotNull(estaNoLimite);
+        assertTrue(estaNoLimite instanceof SaldoDentroLimite);
     }
 
     @Test
@@ -110,23 +132,31 @@ public class MovimentacaoTest {
                 .build();
 
         conta.debitar(BigDecimal.valueOf(10000));
+        
+        Movimento movimentoSaida = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoSaida()
+                .conta(conta)
+                .valor(BigDecimal.valueOf(100000))
+                .build();  
 
-        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(conta, BigDecimal.valueOf(100000));
+        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
         ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
 
         //When
-        boolean estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
 
-        //Then      
-        assertFalse(estaNoLimite);
+        //Then
+        assertNotNull(estaNoLimite);
+        assertTrue(estaNoLimite instanceof SaldoExcedido);
 
     }
-    
+
     @Test
     public void aoSolicitarVerificacaoSaldoDeveEstarForaLimiteTest() {
-      //Given
+        //Given
         ContaId idConta = ContaId.generate();
 
         Empresa empresa = Empresa.builder()
@@ -143,17 +173,25 @@ public class MovimentacaoTest {
                 .empresa(empresa)
                 .calcularLimite()
                 .build();
+        
+        Movimento movimentoSaida = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoSaida()
+                .conta(conta)
+                .valor(BigDecimal.valueOf(15000))
+                .build();
 
-        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(conta, BigDecimal.valueOf(15000));
+        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
         ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
 
         //When
-        boolean estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
 
-        //Then      
-        assertFalse(estaNoLimite);
+        //Then
+        assertNotNull(estaNoLimite);
+        assertTrue(estaNoLimite instanceof SaldoExcedido);
     }
 
     @Test
@@ -214,6 +252,50 @@ public class MovimentacaoTest {
 
         //THEN
         assertTrue(conta.getSaldo().compareTo(BigDecimal.valueOf(50)) == 0);
+    }
+
+    @Test
+    public void aoExcederSaldoGerenteAprovaMovimentacaoTest() {
+                       
+        //Given
+        ContaId idConta = ContaId.generate();
+
+        Empresa empresa = Empresa.builder()
+                .id(EmpresaId.generate())
+                .cnpj(CNPJ.of("11057774000175"))
+                .nome("TOTVS")
+                .responsavel(ResponsavelId.generate())
+                .valorMercado(BigDecimal.valueOf(10000))
+                .quantidadeFuncionarios(2)
+                .build();
+
+        Conta conta = Conta.builder()
+                .id(idConta)
+                .empresa(empresa)
+                .calcularLimite()
+                .build();
+        
+        Movimento movimentoSaida = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoSaida()
+                .conta(conta)
+                .valor(BigDecimal.valueOf(15000))
+                .build();
+                
+        ResultadoVerificacaoSaldo resultadoEvt = SaldoExcedido.from(movimentoSaida);
+        
+        //When
+        SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
+                .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.APROVADA);
+        
+        ContaRepository contaRepository = new ContaRepositoryMock();
+        ContaService contaService = new ContaService(contaRepository);
+        
+        Movimento movimentoAprovado = contaService.handle(aprovacaoGerente);
+                
+        //Then
+        assertNotNull(movimentoAprovado);        
+        assertTrue(movimentoAprovado.isAprovado());
     }
 
     static class ContaRepositoryMock implements ContaRepository {
