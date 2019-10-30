@@ -2,8 +2,6 @@ package com.totvs.tj.qbank.domain.empresa;
 
 import java.math.BigDecimal;
 
-import com.totvs.tj.qbank.domain.documento.CNPJ;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +14,7 @@ public class Empresa {
     private String responsavel;
     private EmpresaId id;
     private String nome;
-    private CNPJ cnpj;
+    private String cnpj;
     private BigDecimal valorMercado;
     private Integer quantidadeFuncionarios;
     

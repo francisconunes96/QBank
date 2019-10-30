@@ -16,16 +16,21 @@ public class Conta {
     private final EmpresaId empresa;
     private BigDecimal saldo;
     private BigDecimal limite;
-    private BigDecimal limiteEmergencial;
+    private LimiteEmergencial solicitouLimiteEmergencial;
     private Situacao situacao;
 
     public boolean aumentarLimite() {
-        if (this.limiteEmergencial.compareTo(BigDecimal.ZERO) == 1) {
+        if (this.limiteEmergencialJaSolicitado()) {
             return false;
         }
 
-        this.limiteEmergencial = this.limite.divide(BigDecimal.valueOf(2));
+        this.limite = this.limite.add(limite.divide(BigDecimal.valueOf(2)));
+        this.solicitouLimiteEmergencial = LimiteEmergencial.SOLICITADO;
         return true;
+    }
+    
+    public boolean limiteEmergencialJaSolicitado() {
+        return LimiteEmergencial.SOLICITADO.equals(this.solicitouLimiteEmergencial);
     }
 
     public void suspender() {
@@ -75,7 +80,7 @@ public class Conta {
     }
 
     private BigDecimal valorLimiteDisponivelParaSaida() {
-        return verificaSeUtilizaLimite() ? valorLimiteDisponivel() : getLimiteTotal();
+        return verificaSeUtilizaLimite() ? valorLimiteDisponivel() : getLimite();
     }
 
     private boolean verificaSeUtilizaLimite() {
@@ -83,15 +88,11 @@ public class Conta {
     }
 
     private BigDecimal valorLimiteDisponivel() {
-        return getLimiteTotal().subtract(this.saldo.negate());
+        return getLimite().subtract(this.saldo.negate());
     }
 
     private boolean verificaSeContemSaldoParaOperacaoSemUtilizarLimite(BigDecimal valorSaida) {
         return this.saldo.subtract(valorSaida).compareTo(BigDecimal.ZERO) >= 0;
-    }
-
-    public BigDecimal getLimiteTotal() {
-        return this.limite.add(this.limiteEmergencial);
     }
 
     public static Builder builder() {
@@ -125,7 +126,7 @@ public class Conta {
         }
 
         public Conta build() {
-            return new Conta(id, empresa.getId(), BigDecimal.ZERO, limite, BigDecimal.ZERO, Situacao.DISPONIVEL);
+            return new Conta(id, empresa.getId(), BigDecimal.ZERO, limite, LimiteEmergencial.NAO_SOLICITADO, Situacao.DISPONIVEL);
         }
 
     }
@@ -133,6 +134,10 @@ public class Conta {
     public static enum Situacao {
         DISPONIVEL,
         SUSPENSA
+    }
+    
+    private static enum LimiteEmergencial {
+        SOLICITADO, NAO_SOLICITADO
     }
 
 }

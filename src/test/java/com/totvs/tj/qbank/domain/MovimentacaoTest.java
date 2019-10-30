@@ -18,10 +18,8 @@ import com.totvs.tj.qbank.app.SolicitacaoVerificacaoSaldo;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
-import com.totvs.tj.qbank.domain.documento.CNPJ;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
-import com.totvs.tj.qbank.domain.empresa.ResponsavelId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
@@ -31,9 +29,9 @@ public class MovimentacaoTest {
 
     Empresa empresa = Empresa.builder()
             .id(EmpresaId.generate())
-            .cnpj(CNPJ.of("11057774000175"))
+            .cnpj("11057774000175")
             .nome("TOTVS")
-            .responsavel(ResponsavelId.generate())
+            .responsavel("23061790004")
             .valorMercado(BigDecimal.valueOf(10000))
             .quantidadeFuncionarios(2)
             .build();
@@ -214,7 +212,11 @@ public class MovimentacaoTest {
                 .build();
 
         //When
-
+        ContaRepository contaRepository = new ContaRepositoryMock();
+        ContaService contaService = new ContaService(contaRepository);
+        
+        
+        
         //Then
 
     }

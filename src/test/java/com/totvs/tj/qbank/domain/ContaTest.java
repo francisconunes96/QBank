@@ -18,7 +18,6 @@ import com.totvs.tj.qbank.app.SuspenderConta;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
-import com.totvs.tj.qbank.domain.documento.CNPJ;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 
@@ -29,7 +28,7 @@ public class ContaTest {
         //Given        
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
+                .cnpj("11057774000175")
                 .nome("TOTVS")
                 .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
@@ -57,7 +56,7 @@ public class ContaTest {
         //Given
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
+                .cnpj("11057774000175")
                 .nome("TOTVS")
                 .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
@@ -86,7 +85,7 @@ public class ContaTest {
 
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
+                .cnpj("11057774000175")
                 .nome("TOTVS")
                 .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
@@ -110,9 +109,13 @@ public class ContaTest {
 
         // WHEN
         service.handle(cmd);
+        
+        System.out.println(repository.getOne(idConta).getLimite());
+        System.out.println(limiteAntigo);
+        System.out.println(limiteAntigo.divide(BigDecimal.valueOf(2)));
 
         // THEN
-        assertTrue(repository.getOne(idConta).getLimiteEmergencial().equals(limiteAntigo.divide(BigDecimal.valueOf(2))));
+        assertTrue(repository.getOne(idConta).getLimite().equals(limiteAntigo.add(limiteAntigo.divide(BigDecimal.valueOf(2)))));
     }
     
     @Test(expected = Exception.class)
@@ -123,7 +126,7 @@ public class ContaTest {
 
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
+                .cnpj("11057774000175")
                 .nome("TOTVS")
                 .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
@@ -157,7 +160,7 @@ public class ContaTest {
 
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
+                .cnpj("11057774000175")
                 .nome("TOTVS")
                 .responsavel("23061790004")
                 .valorMercado(BigDecimal.valueOf(10000))
