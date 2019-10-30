@@ -33,8 +33,16 @@ public class Movimento {
         this.situacao = Situacao.APROVADO;
     }
     
+    public void recusar() {
+        this.situacao = Situacao.RECUSADO;
+    }
+    
     public boolean isAprovado() {
         return Situacao.APROVADO.equals(this.getSituacao());
+    }
+    
+    public boolean isRecusado() {
+        return Situacao.RECUSADO.equals(this.getSituacao());
     }
         
     public static class Builder {
@@ -62,6 +70,11 @@ public class Movimento {
         
         public Builder tipoSaida() {
             this.tipo = Tipo.SAIDA;
+            return this;
+        }
+        
+        public Builder tipoEntrada() {
+            this.tipo = Tipo.ENTRADA;
             return this;
         }
         

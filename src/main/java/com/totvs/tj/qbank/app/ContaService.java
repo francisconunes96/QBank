@@ -64,6 +64,8 @@ public class ContaService {
         
         if (cmd.isAprovada()) {
             movimento.aprovar();
+        } else {
+            movimento.recusar();
         }
         
         return movimento;

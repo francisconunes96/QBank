@@ -24,36 +24,40 @@ import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.empresa.ResponsavelId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
+import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
+import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
 
 public class MovimentacaoTest {
+
+    Empresa empresa = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj(CNPJ.of("11057774000175"))
+            .nome("TOTVS")
+            .responsavel(ResponsavelId.generate())
+            .valorMercado(BigDecimal.valueOf(10000))
+            .quantidadeFuncionarios(2)
+            .build();
+
+    ContaId idConta = ContaId.generate();
+
+    Conta conta = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresa)
+            .calcularLimite()
+            .build();
+
+    Movimento movimentoSaida = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoSaida()
+            .conta(conta)
+            .valor(BigDecimal.valueOf(1000))
+            .build();
 
     @Test
     public void aoSolicitarVerificaoSaldoDeveEstarDentroDoLimiteTest() {
 
         //Given        
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(10000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(ContaId.generate())
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-
         conta.creditar(BigDecimal.valueOf(2000));
-        
-        Movimento movimentoSaida = Movimento.builder()
-                .id(MovimentoId.generate())
-                .tipoSaida()
-                .conta(conta)
-                .valor(BigDecimal.valueOf(1000))
-                .build();        
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
@@ -72,31 +76,7 @@ public class MovimentacaoTest {
     public void aoSolicitarVerificaoSaldoUtilizandoLimiteDeveEstarDentroDoLimiteTest() {
 
         //Given
-        ContaId idConta = ContaId.generate();
-
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(10000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-
-        conta.debitar(BigDecimal.valueOf(1000));        
-
-        Movimento movimentoSaida = Movimento.builder()
-                .id(MovimentoId.generate())
-                .tipoSaida()
-                .conta(conta)
-                .valor(BigDecimal.valueOf(1000))
-                .build();  
+        conta.debitar(BigDecimal.valueOf(1000));
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
@@ -114,31 +94,7 @@ public class MovimentacaoTest {
     @Test
     public void aoSolicitarVerificacaoSaldoUtilizandoLimiteDeveEstarForaLimiteTest() {
         //Given
-        ContaId idConta = ContaId.generate();
-
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(100000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-
         conta.debitar(BigDecimal.valueOf(10000));
-        
-        Movimento movimentoSaida = Movimento.builder()
-                .id(MovimentoId.generate())
-                .tipoSaida()
-                .conta(conta)
-                .valor(BigDecimal.valueOf(100000))
-                .build();  
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
@@ -151,29 +107,11 @@ public class MovimentacaoTest {
         //Then
         assertNotNull(estaNoLimite);
         assertTrue(estaNoLimite instanceof SaldoExcedido);
-
     }
 
     @Test
     public void aoSolicitarVerificacaoSaldoDeveEstarForaLimiteTest() {
         //Given
-        ContaId idConta = ContaId.generate();
-
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(10000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-        
         Movimento movimentoSaida = Movimento.builder()
                 .id(MovimentoId.generate())
                 .tipoSaida()
@@ -196,24 +134,6 @@ public class MovimentacaoTest {
 
     @Test
     public void aoCreditarDeveAumentarSaldoTest() throws Exception {
-        //GIVEN
-        ContaId idConta = ContaId.generate();
-
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(10000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-
         // WHEN
         BigDecimal valorOriginal = conta.getSaldo();
         BigDecimal valorCredito = BigDecimal.valueOf(100);
@@ -227,23 +147,6 @@ public class MovimentacaoTest {
     public void aoDebitarDeveDiminuirSaldoTest() {
 
         //GIVEN
-        ContaId idConta = ContaId.generate();
-
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(10000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-
         conta.creditar(BigDecimal.valueOf(100));
 
         //WHEN        
@@ -256,46 +159,64 @@ public class MovimentacaoTest {
 
     @Test
     public void aoExcederSaldoGerenteAprovaMovimentacaoTest() {
-                       
+
         //Given
-        ContaId idConta = ContaId.generate();
-
-        Empresa empresa = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj(CNPJ.of("11057774000175"))
-                .nome("TOTVS")
-                .responsavel(ResponsavelId.generate())
-                .valorMercado(BigDecimal.valueOf(10000))
-                .quantidadeFuncionarios(2)
-                .build();
-
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(empresa)
-                .calcularLimite()
-                .build();
-        
-        Movimento movimentoSaida = Movimento.builder()
-                .id(MovimentoId.generate())
-                .tipoSaida()
-                .conta(conta)
-                .valor(BigDecimal.valueOf(15000))
-                .build();
-                
         ResultadoVerificacaoSaldo resultadoEvt = SaldoExcedido.from(movimentoSaida);
-        
+
         //When
         SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
                 .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.APROVADA);
-        
+
         ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
-        
+
         Movimento movimentoAprovado = contaService.handle(aprovacaoGerente);
-                
+
         //Then
-        assertNotNull(movimentoAprovado);        
+        assertNotNull(movimentoAprovado);
         assertTrue(movimentoAprovado.isAprovado());
+    }
+
+    @Test
+    public void aoExcederSaldoGerenteReprovaMovimentacaoTest() {
+
+        //Given
+        ResultadoVerificacaoSaldo resultadoEvt = SaldoExcedido.from(movimentoSaida);
+
+        //When
+        SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
+                .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.RECUSADA);
+
+        ContaRepository contaRepository = new ContaRepositoryMock();
+        ContaService contaService = new ContaService(contaRepository);
+
+        Movimento movimentoRecusado = contaService.handle(aprovacaoGerente);
+
+        //Then
+        assertNotNull(movimentoRecusado);
+        assertTrue(movimentoRecusado.isRecusado());
+    }
+
+    @Test
+    public void aoSolicitarTransferenciaDeDividaDeveRealizarATransferencia() {
+        //Given
+        Movimento movimentoEntrada = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoEntrada()
+                .conta(conta)
+                .valor(movimentoSaida.getValor())
+                .build();
+
+        Transferencia transferencia = Transferencia.builder()
+                .id(TransferenciaId.generate())
+                .credito(movimentoEntrada)
+                .debito(movimentoSaida)
+                .build();
+
+        //When
+
+        //Then
+
     }
 
     static class ContaRepositoryMock implements ContaRepository {
