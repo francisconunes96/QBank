@@ -37,6 +37,10 @@ public class Movimento {
         this.situacao = Situacao.RECUSADO;
     }
     
+    public void finalizar() {
+    	this.situacao = Situacao.FINALIZADO;
+    }
+    
     public boolean isAprovado() {
         return Situacao.APROVADO.equals(this.getSituacao());
     }
@@ -85,7 +89,7 @@ public class Movimento {
     }
     
     public static enum Situacao {
-        ABERTO, APROVADO, RECUSADO
+        ABERTO, APROVADO, RECUSADO, FINALIZADO
     }
     
     private static enum Tipo {

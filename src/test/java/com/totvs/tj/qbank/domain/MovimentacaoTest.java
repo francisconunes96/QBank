@@ -22,6 +22,7 @@ import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
+import com.totvs.tj.qbank.domain.movimentacao.SolicitarTransferencia;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
 
@@ -30,7 +31,6 @@ public class MovimentacaoTest {
     Empresa empresa = Empresa.builder()
             .id(EmpresaId.generate())
             .cnpj("11057774000175")
-            .nome("TOTVS")
             .responsavel("23061790004")
             .valorMercado(BigDecimal.valueOf(10000))
             .quantidadeFuncionarios(2)
@@ -196,12 +196,26 @@ public class MovimentacaoTest {
     }
 
     @Test
-    public void aoSolicitarTransferenciaDeDividaDeveRealizarATransferencia() {
+    public void aoTransferirDeContaUmaParaOutraTest() {
         //Given
+    	Empresa empresaSolicitada = Empresa.builder()
+                .id(EmpresaId.generate())
+                .cnpj("40121037000192")
+                .responsavel("30877250057")
+                .valorMercado(BigDecimal.valueOf(15000))
+                .quantidadeFuncionarios(2)
+                .build();
+        
+        Conta contaSolicitada = Conta.builder()
+                .id(ContaId.generate())
+                .empresa(empresaSolicitada)
+                .calcularLimite()
+                .build();
+    	
         Movimento movimentoEntrada = Movimento.builder()
                 .id(MovimentoId.generate())
                 .tipoEntrada()
-                .conta(conta)
+                .conta(contaSolicitada)
                 .valor(movimentoSaida.getValor())
                 .build();
 
@@ -210,15 +224,61 @@ public class MovimentacaoTest {
                 .credito(movimentoEntrada)
                 .debito(movimentoSaida)
                 .build();
+        
+        BigDecimal saldoSolicitanteAntigo = conta.getSaldo();
+        BigDecimal saldoSolicitadaAntigo = contaSolicitada.getSaldo();        
+        
+        //When
+        boolean transferido = transferencia.transferir();
+                
+        //Then
+        assertTrue(transferido);        
+        assertTrue(contaSolicitada.getSaldo().compareTo(saldoSolicitadaAntigo.add(transferencia.getValorCredito())) == 0);
+        assertTrue(conta.getSaldo().compareTo(saldoSolicitanteAntigo.subtract(transferencia.getValorDebito())) == 0);        
+    }
+    
+    @Test
+    public void aoSolicitarTransferenciaTest() {
+    	
+    	//Given
+    	Empresa empresaSolicitada = Empresa.builder()
+                .id(EmpresaId.generate())
+                .cnpj("40121037000192")
+                .responsavel("30877250057")
+                .valorMercado(BigDecimal.valueOf(15000))
+                .quantidadeFuncionarios(2)
+                .build();
+        
+        Conta contaSolicitada = Conta.builder()
+                .id(ContaId.generate())
+                .empresa(empresaSolicitada)
+                .calcularLimite()
+                .build();
+    	
+        Movimento movimentoEntrada = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoEntrada()
+                .conta(contaSolicitada)
+                .valor(movimentoSaida.getValor())
+                .build();
 
+        Transferencia transferencia = Transferencia.builder()
+                .id(TransferenciaId.generate())
+                .credito(movimentoEntrada)
+                .debito(movimentoSaida)
+                .build();
+        
+        SolicitarTransferencia cmd = SolicitarTransferencia
+        		.from(transferencia);
+        
         //When
         ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
         
-        
+        Transferencia transferenciaEfetuada = contaService.handle(cmd);
         
         //Then
-
+        assertTrue(Transferencia.Situacao.FINALIZADA.equals(transferenciaEfetuada.getSituacao()));    	
     }
 
     static class ContaRepositoryMock implements ContaRepository {

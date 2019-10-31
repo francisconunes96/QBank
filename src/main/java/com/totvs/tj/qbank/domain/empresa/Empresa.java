@@ -11,11 +11,10 @@ import lombok.Getter;
 @Builder
 public class Empresa {
     
+	private EmpresaId id;
+	private String cnpj;
     private String responsavel;
-    private EmpresaId id;
-    private String nome;
-    private String cnpj;
-    private BigDecimal valorMercado;
     private Integer quantidadeFuncionarios;
+    private BigDecimal valorMercado;
     
 }

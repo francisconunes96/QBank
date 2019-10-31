@@ -4,6 +4,8 @@ import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
+import com.totvs.tj.qbank.domain.movimentacao.SolicitarTransferencia;
+import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 
 public class ContaService {
 
@@ -70,4 +72,15 @@ public class ContaService {
         
         return movimento;
     }
+
+	public Transferencia handle(SolicitarTransferencia cmd) {
+		
+		Transferencia transferencia = cmd.getTransferencia();
+		
+		if(transferencia.transferir()) {
+			transferencia.finalizar();
+		} 
+		
+		return transferencia;
+	}
 }
