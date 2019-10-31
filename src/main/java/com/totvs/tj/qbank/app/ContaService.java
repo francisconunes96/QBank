@@ -16,111 +16,118 @@ import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
 
 public class ContaService {
 
-	private ContaRepository repository;
+    private ContaRepository repository;
 
-	public ContaService(ContaRepository repository) {
-		this.repository = repository;
+    public ContaService(ContaRepository repository) {
+	this.repository = repository;
+    }
+
+    public ContaId handle(SolicitacaoAberturaConta cmd) {
+
+	ContaId idConta = ContaId.generate();
+
+	Conta conta = Conta.builder()
+		.id(idConta)
+		.empresa(cmd.getEmpresa())
+		.calcularLimite()
+		.build();
+
+	repository.save(conta);
+
+	return idConta;
+    }
+
+    public void handle(SolicitacaoAumentoLimiteEmergencial cmd) throws Exception {
+	Conta conta = repository.getOne(cmd.getIdConta());
+
+	if (!conta.aumentarLimite()) {
+	    throw new Exception("Só é permitido a solicitação de crédito emergencial uma vez");
 	}
 
-	public ContaId handle(SolicitacaoAberturaConta cmd) {
+	repository.save(conta);
+    }
 
-		ContaId idConta = ContaId.generate();
+    public void handle(SuspenderConta cmd) {
 
-		Conta conta = Conta.builder().id(idConta).empresa(cmd.getEmpresa()).calcularLimite().build();
+	Conta conta = repository.getOne(cmd.getConta());
 
-		repository.save(conta);
+	conta.suspender();
 
-		return idConta;
+	repository.save(conta);
+    }
+
+    public ResultadoVerificacaoSaldo handle(SolicitacaoVerificacaoSaldo cmd) {
+	Movimento movimento = cmd.getMovimento();
+	Conta conta = movimento.getConta();
+
+	if (conta.estaDentroDoLimite(movimento.getValor())) {
+	    return SaldoDentroLimite.from(movimento);
 	}
 
-	public void handle(SolicitacaoAumentoLimiteEmergencial cmd) throws Exception {
-		Conta conta = repository.getOne(cmd.getIdConta());
+	return SaldoExcedido.from(movimento);
+    }
 
-		if (!conta.aumentarLimite()) {
-			throw new Exception("Só é permitido a solicitação de crédito emergencial uma vez");
-		}
+    public Movimento handle(SolicitacaoAprovacaoGerente cmd) {
 
-		repository.save(conta);
+	Movimento movimento = cmd.getMovimento();
+
+	if (cmd.isAprovada()) {
+	    movimento.aprovar();
+	} else {
+	    movimento.recusar();
 	}
 
-	public void handle(SuspenderConta cmd) {
+	return movimento;
+    }
 
-		Conta conta = repository.getOne(cmd.getConta());
+    public Transferencia handle(SolicitarTransferencia cmd) {
 
-		conta.suspender();
+	Transferencia transferencia = cmd.getTransferencia();
 
-		repository.save(conta);
-	}
-
-	public ResultadoVerificacaoSaldo handle(SolicitacaoVerificacaoSaldo cmd) {
-		Movimento movimento = cmd.getMovimento();
-		Conta conta = movimento.getConta();
-
-		if (conta.estaDentroDoLimite(movimento.getValor())) {
-			return SaldoDentroLimite.from(movimento);
-		}
-
-		return SaldoExcedido.from(movimento);
-	}
-
-	public Movimento handle(SolicitacaoAprovacaoGerente cmd) {
-
-		Movimento movimento = cmd.getMovimento();
-
-		if (cmd.isAprovada()) {
-			movimento.aprovar();
-		} else {
-			movimento.recusar();
-		}
-
-		return movimento;
+	if (transferencia.transferir()) {
+	    transferencia.finalizar();
 	}
 
 	public Transferencia handle(SolicitacaoTransferencia cmd) {
+	return transferencia;
+    }
 
-		Transferencia transferencia = cmd.getTransferencia();
+    public Emprestimo handle(SolicitarEmprestimo cmd) {
 
-		if (transferencia.transferir()) {
-			transferencia.finalizar();
-		}
+	Emprestimo emprestimo = cmd.getEmprestimo();
 
-		return transferencia;
+	SolicitacaoVerificacaoSaldo verificacaoSaldo = SolicitacaoVerificacaoSaldo.of(emprestimo.getMovimento());
+
+	ResultadoVerificacaoSaldo resultado = this.handle(verificacaoSaldo);
+
+	if (SaldoExcedido.class.equals(resultado.getClass())) {
+	    emprestimo.aguardarAprovacao();
+	    return emprestimo;
 	}
 
-	public Emprestimo handle(SolicitacaoEmprestimo cmd) {
-
-		Emprestimo emprestimo = cmd.getEmprestimo();
-
-		SolicitacaoVerificacaoSaldo verificacaoSaldo = SolicitacaoVerificacaoSaldo.of(emprestimo.getMovimento());
-
-		ResultadoVerificacaoSaldo resultado = this.handle(verificacaoSaldo);
-
-		if (SaldoExcedido.class.equals(resultado.getClass())) {
-			emprestimo.aguardarAprovacao();
-			return emprestimo;
-		}
-
-		if (emprestimo.emprestar()) {
-			emprestimo.liberar();
-		}
-
-		return emprestimo;
+	if (emprestimo.emprestar()) {
+	    emprestimo.liberar();
 	}
 
-	public Emprestimo handle(SolicitacaoAprovacaoEmprestimo cmd) {
+	return emprestimo;
+    }
 
-		Emprestimo emprestimo = cmd.getEmprestimo();
+    public Emprestimo handle(SolicitacaoAprovacaoEmprestimo cmd) {
 
-		if (cmd.isAprovada() && emprestimo.emprestar()) {
-			emprestimo.liberar();
-		} else {
-			emprestimo.recusar();			
-		}
+	Emprestimo emprestimo = cmd.getEmprestimo();
 
-		return emprestimo;
+	if (cmd.isAprovada() && emprestimo.emprestar()) {
+	    emprestimo.liberar();
+	    emprestimo.getMovimento().aprovar();
+	} else {
+	    emprestimo.recusar();
+	    emprestimo.getMovimento().recusar();
 	}
 
-	public CompraDivida handle(SolicitacaoCompraDivida cmd) {
+	return emprestimo;
+    }
+
+    public CompraDivida handle(SolicitacaoCompraDivida cmd) {
 
 		Conta solicitada = cmd.getContaSolicitada();
 		Conta solicitante = cmd.getContaSolicitante();
@@ -130,21 +137,36 @@ public class ContaService {
 		Movimento movimentoSaida = Movimento.builder().id(MovimentoId.generate()).tipoSaida().conta(solicitante)
 				.valor(valorMovimento).build();
 
-		Movimento movimentoEntrada = Movimento.builder().id(MovimentoId.generate()).tipoEntrada().conta(solicitada)
-				.valor(valorMovimento).build();
+	Movimento movimentoEntrada = Movimento.builder()
+		.id(MovimentoId.generate())
+		.tipoEntrada()
+		.conta(solicitada)
+		.valor(valorMovimento)
+		.build();
 
 		Transferencia transferencia = Transferencia.builder().id(TransferenciaId.generate()).credito(movimentoEntrada)
 				.debito(movimentoSaida).build();
 
-		SolicitacaoVerificacaoSaldo solicitacaoVerificacoSaldo = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
-		ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = this.handle(solicitacaoVerificacoSaldo);
+	SolicitacaoVerificacaoSaldo solicitacaoVerificacoSaldo = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
+	ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = this.handle(solicitacaoVerificacoSaldo);
 
-		if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
-			return CompraDivida.from(transferencia);
-		}
-
-		return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.RECUSADA);
-
+	if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
+	    return CompraDivida.from(transferencia);
 	}
 
+	return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.RECUSADA);
+    }
+
+    public CompraDivida handle(SolicitarAprovacaoCompra cmd) {
+
+	CompraDivida compraDivida = cmd.getCompraDivida();
+
+	if (cmd.isAprovada()) {
+	    compraDivida.aprovar();
+	} else {
+	    compraDivida.recusar();
+	}
+
+	return compraDivida;
+    }
 }

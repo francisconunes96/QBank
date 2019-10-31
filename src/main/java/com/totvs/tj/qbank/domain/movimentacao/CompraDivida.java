@@ -12,7 +12,7 @@ public class CompraDivida {
     private Situacao situacao;
 
     public static enum Situacao {
-	INICIADA, RECUSADA
+	INICIADA, RECUSADA, APROVADA
     }
 
     public static CompraDivida from(Transferencia transferencia) {
@@ -21,5 +21,13 @@ public class CompraDivida {
 
     public boolean efetuar() {
 	return transferencia.transferir();
+    }
+
+    public void aprovar() {
+	this.situacao = Situacao.APROVADA;
+    }
+
+    public void recusar() {
+	this.situacao = Situacao.RECUSADA;
     }
 }
