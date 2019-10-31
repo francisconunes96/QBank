@@ -10,12 +10,7 @@ import lombok.Value;
 public class MovimentoId {
     
     private String value;
-    
-    @Override
-    public String toString() {
-        return value;
-    }
-    
+        
     public static MovimentoId generate() {
         return MovimentoId.from(UUID.randomUUID().toString());
     }

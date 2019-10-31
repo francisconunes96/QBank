@@ -11,11 +11,6 @@ public class CompraDividaId {
 
     private String value;
 
-    @Override
-    public String toString() {
-	return value;
-    }
-
     public static CompraDividaId generate() {
 	return CompraDividaId.from(UUID.randomUUID().toString());
     }

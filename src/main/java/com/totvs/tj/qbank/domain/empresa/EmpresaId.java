@@ -10,12 +10,7 @@ import lombok.Value;
 public class EmpresaId {
     
     private String value;
-    
-    @Override
-    public String toString() {
-        return value;
-    }
-    
+        
     public static EmpresaId generate() {
         return EmpresaId.from(UUID.randomUUID().toString());
     }

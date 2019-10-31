@@ -30,11 +30,11 @@ public class Transferencia {
 	}
 
 	private boolean debitar() {
-		return debito.getConta().debitar(getValorDebito());
+		return debito.processar();
 	}
 
 	private boolean creditar() {
-		return credito.getConta().creditar(getValorCredito());
+		return credito.processar();
 	}
 
 	public BigDecimal getValorDebito() {

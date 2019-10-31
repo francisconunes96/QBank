@@ -10,12 +10,7 @@ import lombok.Value;
 public class ContaId {
     
     private String value;
-    
-    @Override
-    public String toString() {
-        return value;
-    }
-    
+        
     public static ContaId generate() {
         return ContaId.from(UUID.randomUUID().toString());
     }

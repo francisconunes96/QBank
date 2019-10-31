@@ -16,8 +16,8 @@ import com.totvs.tj.qbank.app.SaldoExcedido;
 import com.totvs.tj.qbank.app.SolicitacaoAprovacaoEmprestimo;
 import com.totvs.tj.qbank.app.SolicitacaoAprovacaoGerente;
 import com.totvs.tj.qbank.app.SolicitacaoVerificacaoSaldo;
-import com.totvs.tj.qbank.app.SolicitarEmprestimo;
-import com.totvs.tj.qbank.app.SolicitarTransferencia;
+import com.totvs.tj.qbank.app.SolicitacaoEmprestimo;
+import com.totvs.tj.qbank.app.SolicitacaoTransferencia;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
@@ -272,7 +272,7 @@ public class MovimentacaoTest {
                 .debito(movimentoSaida)
                 .build();
         
-        SolicitarTransferencia cmd = SolicitarTransferencia
+        SolicitacaoTransferencia cmd = SolicitacaoTransferencia
         		.from(transferencia);
         
         //When
