@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.totvs.tj.qbank.app.ContaService;
 import com.totvs.tj.qbank.app.SolicitacaoAprovacaoEmprestimo;
-import com.totvs.tj.qbank.app.SolicitarEmprestimo;
+import com.totvs.tj.qbank.app.SolicitacaoEmprestimo;
 import com.totvs.tj.qbank.domain.MovimentacaoTest.ContaRepositoryMock;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
@@ -81,7 +81,7 @@ public class EmprestimoTest {
     	BigDecimal saldoAntigo = conta.getSaldo();
     	
     	// When
-    	SolicitarEmprestimo cmd = SolicitarEmprestimo.from(emprestimo);
+    	SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(emprestimo);
     	
     	ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);
@@ -111,7 +111,7 @@ public class EmprestimoTest {
     			.build();
     	
     	// When
-    	SolicitarEmprestimo cmd = SolicitarEmprestimo.from(emprestimo);
+    	SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(emprestimo);
     	
     	ContaRepository contaRepository = new ContaRepositoryMock();
         ContaService contaService = new ContaService(contaRepository);

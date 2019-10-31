@@ -10,12 +10,7 @@ import lombok.Value;
 public class TransferenciaId {
     
     private String value;
-    
-    @Override
-    public String toString() {
-        return value;
-    }
-    
+        
     public static TransferenciaId generate() {
         return TransferenciaId.from(UUID.randomUUID().toString());
     }

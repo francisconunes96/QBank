@@ -28,6 +28,7 @@ public class Emprestimo {
 	}
 	
 	public void liberar() {
+		this.getMovimento().aprovar();
 		this.situacao = Situacao.LIBERADO;		
 	}
 	
@@ -36,6 +37,7 @@ public class Emprestimo {
 	}
 	
 	public void recusar() {
+		this.getMovimento().recusar();
 		this.situacao = Situacao.RECUSADO;
 	}	
 		

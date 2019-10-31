@@ -1,14 +1,13 @@
 package com.totvs.tj.qbank.app;
 
-import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
+import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(staticName = "from")
-public class SolicitarTransferencia {
+public class SolicitacaoEmprestimo {
 	
-	private Transferencia transferencia;
-	
+	private Emprestimo emprestimo;	
 }
