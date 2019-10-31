@@ -1,12 +1,19 @@
 package com.totvs.tj.qbank.app;
 
+import java.math.BigDecimal;
+
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDivida;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDividaId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
+import com.totvs.tj.qbank.domain.movimentacao.SolicitarTransferencia;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
+import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDivida.Situacao;
 
 public class ContaService {
 
@@ -120,4 +127,42 @@ public class ContaService {
 		
 		return emprestimo;
 	}
+
+    public CompraDivida handle(SolicitacaoCompraDivida cmd) {
+
+	Conta solicitada = cmd.getContaSolicitada();
+	Conta solicitante = cmd.getContaSolicitante();
+
+	BigDecimal valorMovimento = solicitada.getSaldo();
+
+	Movimento movimentoSaida = Movimento.builder()
+		.id(MovimentoId.generate())
+		.tipoSaida()
+		.conta(solicitante)
+		.valor(valorMovimento)
+		.build();
+
+		.id(MovimentoId.generate())
+		.tipoEntrada()
+		.conta(solicitada)
+		.valor(valorMovimento)
+		.build();
+
+	Transferencia transferencia = Transferencia.builder()
+		.id(TransferenciaId.generate())
+		.credito(movimentoEntrada)
+		.debito(movimentoSaida)
+		.build();
+
+	SolicitacaoVerificacaoSaldo solicitacaoVerificacoSaldo = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
+	ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = this.handle(solicitacaoVerificacoSaldo);
+	
+	if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
+	    return CompraDivida.from(transferencia);
+	}
+
+	return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.RECUSADA);
+
+    }
+	Movimento movimentoEntrada = Movimento.builder()
 }
