@@ -3,84 +3,121 @@ package com.totvs.tj.qbank.app;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
+import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
-import com.totvs.tj.qbank.domain.movimentacao.SolicitarTransferencia;
+import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 
 public class ContaService {
 
-    private ContaRepository repository;
+	private ContaRepository repository;
 
-    public ContaService(ContaRepository repository) {
-        this.repository = repository;
-    }
+	public ContaService(ContaRepository repository) {
+		this.repository = repository;
+	}
 
-    public ContaId handle(SolicitacaoAberturaConta cmd) {
+	public ContaId handle(SolicitacaoAberturaConta cmd) {
 
-        ContaId idConta = ContaId.generate();
+		ContaId idConta = ContaId.generate();
 
-        Conta conta = Conta.builder()
-                .id(idConta)
-                .empresa(cmd.getEmpresa())
-                .calcularLimite()
-                .build();
+		Conta conta = Conta.builder()
+				.id(idConta)
+				.empresa(cmd.getEmpresa())
+				.calcularLimite()
+				.build();
 
-        repository.save(conta);
+		repository.save(conta);
 
-        return idConta;
-    }
+		return idConta;
+	}
 
-    public void handle(SolicitacaoAumentoLimiteEmergencial cmd) throws Exception {
-        Conta conta = repository.getOne(cmd.getIdConta());
+	public void handle(SolicitacaoAumentoLimiteEmergencial cmd) throws Exception {
+		Conta conta = repository.getOne(cmd.getIdConta());
 
-        if (!conta.aumentarLimite()) {
-            throw new Exception("Só é permitido a solicitação de crédito emergencial uma vez");
-        }
+		if (!conta.aumentarLimite()) {
+			throw new Exception("Só é permitido a solicitação de crédito emergencial uma vez");
+		}
 
-        repository.save(conta);
-    }
+		repository.save(conta);
+	}
 
-    public void handle(SuspenderConta cmd) {
+	public void handle(SuspenderConta cmd) {
 
-        Conta conta = repository.getOne(cmd.getConta());
+		Conta conta = repository.getOne(cmd.getConta());
 
-        conta.suspender();
+		conta.suspender();
 
-        repository.save(conta);
-    }
+		repository.save(conta);
+	}
 
-    public ResultadoVerificacaoSaldo handle(SolicitacaoVerificacaoSaldo cmd) {
-        Movimento movimento = cmd.getMovimento();        
-        Conta conta = movimento.getConta();
+	public ResultadoVerificacaoSaldo handle(SolicitacaoVerificacaoSaldo cmd) {
+		Movimento movimento = cmd.getMovimento();
+		Conta conta = movimento.getConta();
 
-        if (conta.estaDentroDoLimite(movimento.getValor())) {
-            return SaldoDentroLimite.from(movimento);
-        }
+		if (conta.estaDentroDoLimite(movimento.getValor())) {
+			return SaldoDentroLimite.from(movimento);
+		}
 
-        return SaldoExcedido.from(movimento);
-    }
+		return SaldoExcedido.from(movimento);
+	}
 
-    public Movimento handle(SolicitacaoAprovacaoGerente cmd) {
-        
-        Movimento movimento = cmd.getMovimento();
-        
-        if (cmd.isAprovada()) {
-            movimento.aprovar();
-        } else {
-            movimento.recusar();
-        }
-        
-        return movimento;
-    }
+	public Movimento handle(SolicitacaoAprovacaoGerente cmd) {
+
+		Movimento movimento = cmd.getMovimento();
+
+		if (cmd.isAprovada()) {
+			movimento.aprovar();
+		} else {
+			movimento.recusar();
+		}
+
+		return movimento;
+	}
 
 	public Transferencia handle(SolicitarTransferencia cmd) {
-		
+
 		Transferencia transferencia = cmd.getTransferencia();
-		
-		if(transferencia.transferir()) {
+
+		if (transferencia.transferir()) {
 			transferencia.finalizar();
-		} 
-		
+		}
+
 		return transferencia;
+	}
+
+	public Emprestimo handle(SolicitarEmprestimo cmd) {
+
+		Emprestimo emprestimo = cmd.getEmprestimo();
+		
+		SolicitacaoVerificacaoSaldo verificacaoSaldo = 
+				SolicitacaoVerificacaoSaldo.of(emprestimo.getMovimento());
+		
+		ResultadoVerificacaoSaldo resultado = this.handle(verificacaoSaldo);
+		
+		if (SaldoExcedido.class.equals(resultado.getClass())) {
+			emprestimo.aguardarAprovacao();
+			return emprestimo;
+		}		
+
+		if (emprestimo.emprestar()) {
+			emprestimo.liberar();			
+		}
+
+		return emprestimo;
+	}
+
+	public Emprestimo handle(SolicitacaoAprovacaoEmprestimo cmd) {
+		
+		Emprestimo emprestimo = cmd.getEmprestimo();
+
+		if (cmd.isAprovada() && emprestimo.emprestar()) {			
+			emprestimo.liberar();
+			emprestimo.getMovimento().aprovar();					
+		} else {
+			emprestimo.recusar();
+			emprestimo.getMovimento().recusar();
+		}
+		
+		return emprestimo;
 	}
 }

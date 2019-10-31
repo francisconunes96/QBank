@@ -107,10 +107,6 @@ public class ContaTest {
         // WHEN
         service.handle(cmd);
         
-        System.out.println(repository.getOne(idConta).getLimite());
-        System.out.println(limiteAntigo);
-        System.out.println(limiteAntigo.divide(BigDecimal.valueOf(2)));
-
         // THEN
         assertTrue(repository.getOne(idConta).getLimite().equals(limiteAntigo.add(limiteAntigo.divide(BigDecimal.valueOf(2)))));
     }

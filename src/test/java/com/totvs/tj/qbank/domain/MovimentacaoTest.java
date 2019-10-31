@@ -13,16 +13,20 @@ import com.totvs.tj.qbank.app.ContaService;
 import com.totvs.tj.qbank.app.ResultadoVerificacaoSaldo;
 import com.totvs.tj.qbank.app.SaldoDentroLimite;
 import com.totvs.tj.qbank.app.SaldoExcedido;
+import com.totvs.tj.qbank.app.SolicitacaoAprovacaoEmprestimo;
 import com.totvs.tj.qbank.app.SolicitacaoAprovacaoGerente;
 import com.totvs.tj.qbank.app.SolicitacaoVerificacaoSaldo;
+import com.totvs.tj.qbank.app.SolicitarEmprestimo;
+import com.totvs.tj.qbank.app.SolicitarTransferencia;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
+import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
+import com.totvs.tj.qbank.domain.movimentacao.EmprestimoId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
-import com.totvs.tj.qbank.domain.movimentacao.SolicitarTransferencia;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
 
@@ -280,7 +284,7 @@ public class MovimentacaoTest {
         //Then
         assertTrue(Transferencia.Situacao.FINALIZADA.equals(transferenciaEfetuada.getSituacao()));    	
     }
-
+           
     static class ContaRepositoryMock implements ContaRepository {
 
         private final Map<ContaId, Conta> contas = new LinkedHashMap<>();
