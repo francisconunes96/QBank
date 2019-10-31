@@ -48,6 +48,14 @@ public class Movimento {
     public boolean isRecusado() {
         return Situacao.RECUSADO.equals(this.getSituacao());
     }
+    
+    public boolean processar() {
+    	if (Tipo.ENTRADA.equals(this.tipo)) {
+    		return this.conta.creditar(this.valor);
+    	} else {
+    		return this.conta.debitar(this.valor);
+    	}    	    	
+    }
         
     public static class Builder {
         
