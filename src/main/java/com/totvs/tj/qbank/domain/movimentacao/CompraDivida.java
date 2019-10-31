@@ -12,7 +12,7 @@ public class CompraDivida {
     private Situacao situacao;
 
     public static enum Situacao {
-	INICIADA
+	INICIADA, RECUSADA
     }
 
     public static CompraDivida from(Transferencia transferencia) {

@@ -6,11 +6,13 @@ import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.movimentacao.CompraDivida;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDividaId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 import com.totvs.tj.qbank.domain.movimentacao.SolicitarTransferencia;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDivida.Situacao;
 
 public class ContaService {
 
@@ -116,7 +118,14 @@ public class ContaService {
 		.debito(movimentoSaida)
 		.build();
 
-	return CompraDivida.from(transferencia);
+	SolicitacaoVerificacaoSaldo solicitacaoVerificacoSaldo = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
+	ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = this.handle(solicitacaoVerificacoSaldo);
+	
+	if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
+	    return CompraDivida.from(transferencia);
+	}
+
+	return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.RECUSADA);
 
     }
 }
