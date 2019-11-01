@@ -22,8 +22,8 @@ public class CompraDivida {
         return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
     }
 
-    public boolean efetuar() {
-        return transferencia.transferir();
+    public void efetuar() {
+        transferencia.transferir();
     }
 
     public void aprovar() {

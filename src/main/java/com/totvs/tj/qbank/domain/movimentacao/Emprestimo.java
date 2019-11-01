@@ -23,8 +23,9 @@ public class Emprestimo {
 		this.situacao = builder.situacao;
 	}
 	
-	public boolean emprestar() {		
-		return movimento.processar();	
+	public void emprestar() {		
+		movimento.processar();
+		liberar();
 	}
 	
 	public void liberar() {

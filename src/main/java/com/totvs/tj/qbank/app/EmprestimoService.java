@@ -19,9 +19,7 @@ public class EmprestimoService {
 			return emprestimo;
 		}
 
-		if (emprestimo.emprestar()) {
-			emprestimo.liberar();
-		}
+		emprestimo.emprestar();
 
 		return emprestimo;
 	}
@@ -30,8 +28,8 @@ public class EmprestimoService {
 
 		Emprestimo emprestimo = cmd.getEmprestimo();
 
-		if (cmd.isAprovada() && emprestimo.emprestar()) {
-			emprestimo.liberar();			
+		if (cmd.isAprovada()) {
+		    emprestimo.emprestar();
 		} else {
 			emprestimo.recusar();
 		}

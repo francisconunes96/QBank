@@ -48,6 +48,28 @@ public class ContaTest {
                 empresa.getValorMercado().divide(BigDecimal.valueOf(empresa.getQuantidadeFuncionarios())));
 
     }
+    
+    @Test
+    public void aoAbrirContaComLimiteMaiorQueOPermitidoTest() {
+      //Given        
+        Empresa empresa = Empresa.builder()
+                .id(EmpresaId.generate())
+                .cnpj("11057774000175")
+                .responsavel("23061790004")
+                .valorMercado(BigDecimal.valueOf(100000))
+                .quantidadeFuncionarios(2)
+                .build();
+
+        //When
+        Conta conta = Conta.builder()
+                .id(ContaId.generate())
+                .empresa(empresa)
+                .calcularLimite()
+                .build();
+        
+        //Then
+        assertTrue(conta.getLimite().equals(BigDecimal.valueOf(15000)));
+    }
 
     @Test
     public void aoSolicitarAberturaContaDeveAbrirUmaContaTest() {
@@ -176,7 +198,6 @@ public class ContaTest {
         
         //THEN
         assertFalse(repository.getOne(idConta).isDisponivel());
-        
     }
 
     static class ContaRepositoryMock implements ContaRepository {

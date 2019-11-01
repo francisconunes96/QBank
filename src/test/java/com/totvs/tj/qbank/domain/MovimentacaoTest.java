@@ -125,6 +125,30 @@ public class MovimentacaoTest {
     }
 
     @Test
+    public void aoSolicitarVerificacaoSaldoComSaldoPositivoTest() {
+        //Given
+        conta.creditar(BigDecimal.valueOf(1200));
+        
+        Movimento movimentoSaida = Movimento.builder()
+                .id(MovimentoId.generate())
+                .tipoSaida()
+                .conta(conta)
+                .valor(BigDecimal.valueOf(15000))
+                .build();
+
+        SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
+
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
+
+        //When
+        ResultadoVerificacaoSaldo estaNoLimite = service.handle(cmd);
+
+        //Then
+        assertNotNull(estaNoLimite);
+        assertTrue(estaNoLimite instanceof SaldoExcedido);
+    }
+
+    @Test
     public void aoCreditarDeveAumentarSaldoTest() throws Exception {
         // WHEN
         BigDecimal valorOriginal = conta.getSaldo();
@@ -188,20 +212,20 @@ public class MovimentacaoTest {
         assertNotNull(movimentoRecusado);
         assertTrue(movimentoRecusado.isRecusado());
     }
-              
+
     static class MovimentoRepositoryMock implements MovimentoRepository {
 
         private final Map<MovimentoId, Movimento> movimentos = new LinkedHashMap<>();
-        
-		@Override
-		public void save(Movimento movimento) {
-			movimentos.put(movimento.getId(), movimento);			
-		}
 
-		@Override
-		public Movimento getOne(MovimentoId id) {
-			return movimentos.get(id);
-		}
+        @Override
+        public void save(Movimento movimento) {
+            movimentos.put(movimento.getId(), movimento);
+        }
+
+        @Override
+        public Movimento getOne(MovimentoId id) {
+            return movimentos.get(id);
+        }
 
     }
 

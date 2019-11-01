@@ -15,10 +15,8 @@ public class CompraDividaService {
 
         Transferencia transferencia = cmd.getTransferencia();
 
-        if (transferencia.transferir()) {
-            transferencia.finalizar();
-        }
-
+       transferencia.transferir();
+       
         return transferencia;
     }
 

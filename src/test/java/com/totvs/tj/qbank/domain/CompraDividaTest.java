@@ -80,10 +80,9 @@ public class CompraDividaTest {
         BigDecimal saldoSolicitadaAntigo = contaSolicitada.getSaldo();        
         
         //When
-        boolean transferido = transferencia.transferir();
+        transferencia.transferir();
                 
         //Then
-        assertTrue(transferido);        
         assertTrue(contaSolicitada.getSaldo().compareTo(saldoSolicitadaAntigo.add(transferencia.getValorCredito())) == 0);
         assertTrue(conta.getSaldo().compareTo(saldoSolicitanteAntigo.subtract(transferencia.getValorDebito())) == 0);        
     }
@@ -258,10 +257,9 @@ public class CompraDividaTest {
 		CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
 	
 		// WHEN
-		boolean compraEfetuada = compraDivida.efetuar();
+		compraDivida.efetuar();
 	
 		// THEN
-		assertTrue(compraEfetuada);
 		assertTrue(contaSolicitada.getSaldo().compareTo(BigDecimal.ZERO) == 0);
 		assertTrue(contaSolicitante.getSaldo().compareTo(valorMovimentoSolicitante) == 0);
     }

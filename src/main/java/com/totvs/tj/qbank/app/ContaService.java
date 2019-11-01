@@ -3,7 +3,6 @@ package com.totvs.tj.qbank.app;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
 import com.totvs.tj.qbank.domain.conta.ContaRepository;
-import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 
 public class ContaService {
 
@@ -11,7 +10,7 @@ public class ContaService {
 
 	public ContaService(ContaRepository repository) {
 		this.repository = repository;
-	}
+	} 
 
 	public ContaId handle(SolicitacaoAberturaConta cmd) {
 

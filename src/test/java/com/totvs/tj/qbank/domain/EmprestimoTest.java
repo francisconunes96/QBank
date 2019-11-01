@@ -37,29 +37,6 @@ public class EmprestimoTest {
             .calcularLimite()
             .build();
 	
-	@Test
-    public void aoRealizarEmprestimoTest() {
-    	
-    	// Given    
-    	Movimento movimento = Movimento.builder()
-    			.id(MovimentoId.generate())
-    			.tipoEntrada()
-    			.conta(conta)
-    			.valor(BigDecimal.valueOf(1000))
-    			.build();
-    	    	
-    	Emprestimo emprestimo = Emprestimo.builder()
-    			.id(EmprestimoId.generate())
-    			.movimento(movimento)    			    		
-    			.build();
-    	
-    	// When
-    	boolean emprestimoEfetuado = emprestimo.emprestar();
-    	
-    	// Then
-    	assertTrue(emprestimoEfetuado);    	
-    }
-    
     @Test
     public void aoSolicitarEmprestimoDeveRealizarEmprestimoTest() {
     	

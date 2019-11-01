@@ -25,16 +25,18 @@ public class Transferencia {
 		this.situacao = Situacao.ABERTA;
 	}
 
-	public boolean transferir() {
-		return debitar() && creditar();
+	public void transferir() {
+	    debitar();
+	    creditar();
+	    finalizar();
 	}
 
-	private boolean debitar() {
-		return debito.processar();
+	private void debitar() {
+		debito.processar();
 	}
 
-	private boolean creditar() {
-		return credito.processar();
+	private void creditar() {
+		credito.processar();
 	}
 
 	public BigDecimal getValorDebito() {
@@ -60,7 +62,7 @@ public class Transferencia {
 
 		public Builder id(TransferenciaId id) {
 			this.id = id;
-			return this;
+			return this; 
 		}
 
 		public Builder credito(Movimento credito) {

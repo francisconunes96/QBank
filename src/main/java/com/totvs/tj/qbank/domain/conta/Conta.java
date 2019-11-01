@@ -41,14 +41,12 @@ public class Conta {
         return Situacao.DISPONIVEL.equals(this.situacao);
     }
 
-    public boolean creditar(BigDecimal valorCredito) {
+    public void creditar(BigDecimal valorCredito) {
         this.saldo = this.saldo.add(valorCredito);
-        return true;
     }
     
-    public boolean debitar(BigDecimal valorDebito) {
+    public void debitar(BigDecimal valorDebito) {
         this.saldo = this.saldo.subtract(valorDebito);
-        return true;
     }
 
     public boolean estaDentroDoLimite(BigDecimal valorSaida) {
@@ -70,7 +68,7 @@ public class Conta {
     private BigDecimal saldoCorrente() {
         return verificaSeTemSaldo() ? this.saldo : BigDecimal.ZERO; 
     }
-    
+      
     private boolean verificaSeTemSaldo() {
         return this.saldo.compareTo(BigDecimal.ZERO) == 1;
     }

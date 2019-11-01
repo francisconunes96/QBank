@@ -53,11 +53,11 @@ public class Movimento {
         return Situacao.RECUSADO.equals(this.getSituacao());
     }
     
-    public boolean processar() {
+    public void processar() {
         if (Tipo.ENTRADA.equals(this.tipo)) {
-            return this.conta.creditar(this.valor);
+            this.conta.creditar(this.valor);
         } else {
-            return this.conta.debitar(this.valor);
+            this.conta.debitar(this.valor);
         }
     }
 
