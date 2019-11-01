@@ -44,7 +44,8 @@ public class MovimentacaoTest {
 
     Movimento movimentoSaida = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoSaida()
+            .debito()
+            .emprestimo()
             .conta(conta)
             .valor(BigDecimal.valueOf(1000))
             .build();
@@ -107,7 +108,8 @@ public class MovimentacaoTest {
         //Given
         Movimento movimentoSaida = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoSaida()
+                .debito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(15000))
                 .build();
@@ -131,7 +133,8 @@ public class MovimentacaoTest {
         
         Movimento movimentoSaida = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoSaida()
+                .debito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(15000))
                 .build();
@@ -166,8 +169,8 @@ public class MovimentacaoTest {
         conta.creditar(BigDecimal.valueOf(100));
 
         //WHEN        
-        BigDecimal valorDebito = BigDecimal.valueOf(50);
-        conta.debitar(valorDebito);
+        BigDecimal valor = BigDecimal.valueOf(50);
+        conta.debitar(valor);
 
         //THEN
         assertTrue(conta.getSaldo().compareTo(BigDecimal.valueOf(50)) == 0);

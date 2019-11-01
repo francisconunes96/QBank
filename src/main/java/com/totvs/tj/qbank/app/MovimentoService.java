@@ -20,6 +20,8 @@ public class MovimentoService {
 		} else {
 			movimento.recusar();
 		}
+		
+		repository.save(movimento);
 
 		return movimento;
 	}

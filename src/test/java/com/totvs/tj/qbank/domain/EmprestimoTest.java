@@ -44,7 +44,8 @@ public class EmprestimoTest {
         // Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .credito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(1000))
                 .build();
@@ -75,7 +76,8 @@ public class EmprestimoTest {
         // Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .credito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(2500))
                 .build();
@@ -102,7 +104,8 @@ public class EmprestimoTest {
         // Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .credito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(2500))
                 .build();
@@ -134,7 +137,8 @@ public class EmprestimoTest {
         // Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .credito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(2500))
                 .build();
@@ -166,7 +170,8 @@ public class EmprestimoTest {
         //Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .debito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(2500))
                 .build();
@@ -190,7 +195,8 @@ public class EmprestimoTest {
         //Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .debito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(1250))
                 .build();
@@ -219,7 +225,8 @@ public class EmprestimoTest {
         //Given
         Movimento movimento = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .debito()
+                .emprestimo()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(2000))
                 .build();

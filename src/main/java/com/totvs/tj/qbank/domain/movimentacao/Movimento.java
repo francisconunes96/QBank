@@ -15,6 +15,7 @@ public class Movimento {
     private final BigDecimal valor;
     private final Conta conta;
     private final Tipo tipo;
+    private final Origem origem;
     private Situacao situacao;
 
     public static Builder builder() {
@@ -27,6 +28,7 @@ public class Movimento {
         this.conta = builder.conta;
         this.tipo = builder.tipo;
         this.situacao = builder.situacao;
+        this.origem = builder.origem;
     }
 
     public void aprovar() {
@@ -54,7 +56,7 @@ public class Movimento {
     }
     
     public void processar() {
-        if (Tipo.ENTRADA.equals(this.tipo)) {
+        if (Tipo.CREDITO.equals(this.tipo)) {
             this.conta.creditar(this.valor);
         } else {
             this.conta.debitar(this.valor);
@@ -68,6 +70,7 @@ public class Movimento {
         private Conta conta;
         private Tipo tipo;
         private Situacao situacao;
+        private Origem origem;
 
         public Builder id(MovimentoId id) {
             this.id = id;
@@ -84,13 +87,23 @@ public class Movimento {
             return this;
         }
 
-        public Builder tipoSaida() {
-            this.tipo = Tipo.SAIDA;
+        public Builder debito() {
+            this.tipo = Tipo.DEBITO;
             return this;
         }
 
-        public Builder tipoEntrada() {
-            this.tipo = Tipo.ENTRADA;
+        public Builder credito() {
+            this.tipo = Tipo.CREDITO;
+            return this;
+        }
+        
+        public Builder emprestimo() {
+            this.origem = Origem.EMPRESTIMO;
+            return this;
+        }
+        
+        public Builder compraDivida() {
+            this.origem = Origem.COMPRA_DIVIDA;
             return this;
         }
 
@@ -109,8 +122,13 @@ public class Movimento {
     }
 
     private static enum Tipo {
-        SAIDA,
-        ENTRADA
+        DEBITO,
+        CREDITO
+    }
+    
+    private static enum Origem {
+        EMPRESTIMO,
+        COMPRA_DIVIDA
     }
 
 }

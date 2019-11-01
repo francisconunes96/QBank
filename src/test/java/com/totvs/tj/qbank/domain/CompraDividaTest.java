@@ -58,14 +58,16 @@ public class CompraDividaTest {
         
         Movimento movimentoSaida = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoSaida()
+                .debito()
+                .compraDivida()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(1000))
                 .build();
     	
         Movimento movimentoEntrada = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .credito()
+                .compraDivida()
                 .conta(contaSolicitada)
                 .valor(movimentoSaida.getValor())
                 .build();
@@ -121,14 +123,16 @@ public class CompraDividaTest {
         
         Movimento movimentoSaida = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoSaida()
+                .debito()
+                .compraDivida()
                 .conta(conta)
                 .valor(BigDecimal.valueOf(1000))
                 .build();
     	
         Movimento movimentoEntrada = Movimento.builder()
                 .id(MovimentoId.generate())
-                .tipoEntrada()
+                .credito()
+                .compraDivida()
                 .conta(contaSolicitada)
                 .valor(movimentoSaida.getValor())
                 .build();
@@ -236,14 +240,16 @@ public class CompraDividaTest {
 	
 		Movimento movimentoSolicitante = Movimento.builder()
 			.id(MovimentoId.generate())
-			.tipoSaida()
+			.debito()
+			.compraDivida()
 			.conta(contaSolicitante)
 			.valor(valorMovimentoSolicitante.negate())
 			.build();
 	
 		Movimento movimentoSolicitada = Movimento.builder()
 			.id(MovimentoId.generate())
-			.tipoEntrada()
+			.credito()
+			.compraDivida()
 			.conta(contaSolicitada)
 			.valor(valorMovimentoSolicitada.negate())
 			.build();
@@ -302,14 +308,16 @@ public class CompraDividaTest {
 	
 		Movimento movimentoSolicitante = Movimento.builder()
 			.id(MovimentoId.generate())
-			.tipoSaida()
+			.debito()
+			.compraDivida()
 			.conta(contaSolicitante)
 			.valor(valorMovimentoSolicitante.negate())
 			.build();
 	
 		Movimento movimentoSolicitada = Movimento.builder()
 			.id(MovimentoId.generate())
-			.tipoEntrada()
+			.credito()
+			.compraDivida()
 			.conta(contaSolicitada)
 			.valor(valorMovimentoSolicitada.negate())
 			.build();
@@ -372,14 +380,16 @@ public class CompraDividaTest {
     
         Movimento movimentoSolicitante = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoSaida()
+            .debito()
+            .compraDivida()
             .conta(contaSolicitante)
             .valor(valorMovimentoSolicitante.negate())
             .build();
     
         Movimento movimentoSolicitada = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoEntrada()
+            .credito()
+            .compraDivida()
             .conta(contaSolicitada)
             .valor(valorMovimentoSolicitada.negate())
             .build();
@@ -436,30 +446,7 @@ public class CompraDividaTest {
             .build();
     
         contaSolicitada.debitar(BigDecimal.valueOf(3750));
-    
-        BigDecimal valorMovimentoSolicitada = contaSolicitada.getSaldo();
-        BigDecimal valorMovimentoSolicitante = contaSolicitada.getSaldo();
-    
-        Movimento movimentoSolicitante = Movimento.builder()
-            .id(MovimentoId.generate())
-            .tipoSaida()
-            .conta(contaSolicitante)
-            .valor(valorMovimentoSolicitante.negate())
-            .build();
-    
-        Movimento movimentoSolicitada = Movimento.builder()
-            .id(MovimentoId.generate())
-            .tipoEntrada()
-            .conta(contaSolicitada)
-            .valor(valorMovimentoSolicitada.negate())
-            .build();
-    
-        Transferencia transferencia = Transferencia.builder()
-            .id(TransferenciaId.generate())
-            .credito(movimentoSolicitada)
-            .debito(movimentoSolicitante)
-            .build();
-    
+        
         // WHEN
         SolicitacaoCompraDivida cmd = SolicitacaoCompraDivida.from(contaSolicitante, contaSolicitada);
         
@@ -509,14 +496,16 @@ public class CompraDividaTest {
     
         Movimento movimentoSolicitante = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoSaida()
+            .debito()
+            .compraDivida()
             .conta(contaSolicitante)
             .valor(valorMovimentoSolicitante.negate())
             .build();
     
         Movimento movimentoSolicitada = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoEntrada()
+            .credito()
+            .compraDivida()
             .conta(contaSolicitada)
             .valor(valorMovimentoSolicitada.negate())
             .build();
@@ -575,14 +564,16 @@ public class CompraDividaTest {
     
         Movimento movimentoSolicitante = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoSaida()
+            .debito()
+            .compraDivida()
             .conta(contaSolicitante)
             .valor(valorMovimentoSolicitante.negate())
             .build();
     
         Movimento movimentoSolicitada = Movimento.builder()
             .id(MovimentoId.generate())
-            .tipoEntrada()
+            .credito()
+            .compraDivida()
             .conta(contaSolicitada)
             .valor(valorMovimentoSolicitada.negate())
             .build();

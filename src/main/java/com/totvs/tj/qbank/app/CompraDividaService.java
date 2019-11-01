@@ -27,10 +27,10 @@ public class CompraDividaService {
 
         BigDecimal valorMovimento = solicitada.getSaldo().negate();
 
-        Movimento movimentoSaida = Movimento.builder().id(MovimentoId.generate()).tipoSaida().conta(solicitante)
+        Movimento movimentoSaida = Movimento.builder().id(MovimentoId.generate()).debito().conta(solicitante).compraDivida()
                 .valor(valorMovimento).build();
 
-        Movimento movimentoEntrada = Movimento.builder().id(MovimentoId.generate()).tipoEntrada().conta(solicitada)
+        Movimento movimentoEntrada = Movimento.builder().id(MovimentoId.generate()).credito().conta(solicitada).compraDivida()
                 .valor(valorMovimento).build();
 
         Transferencia transferencia = Transferencia.builder().id(TransferenciaId.generate()).credito(movimentoEntrada)
