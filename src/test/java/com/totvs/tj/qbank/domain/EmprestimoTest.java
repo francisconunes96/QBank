@@ -7,13 +7,11 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
-import com.totvs.tj.qbank.app.ContaService;
+import com.totvs.tj.qbank.app.EmprestimoService;
 import com.totvs.tj.qbank.app.SolicitacaoAprovacaoEmprestimo;
 import com.totvs.tj.qbank.app.SolicitacaoEmprestimo;
-import com.totvs.tj.qbank.domain.MovimentacaoTest.ContaRepositoryMock;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
-import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
@@ -82,11 +80,10 @@ public class EmprestimoTest {
     	
     	// When
     	SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(emprestimo);
-    	
-    	ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+    	    	
+        EmprestimoService emprestimoService = new EmprestimoService();
         
-        Emprestimo emprestimoEfetuado = contaService.handle(cmd);
+        Emprestimo emprestimoEfetuado = emprestimoService.handle(cmd);
     	
     	// Then
     	assertNotNull(emprestimoEfetuado);
@@ -113,10 +110,9 @@ public class EmprestimoTest {
     	// When
     	SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(emprestimo);
     	
-    	ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+    	EmprestimoService emprestimoService = new EmprestimoService();
         
-        Emprestimo emprestimoAguardandoAprovacao = contaService.handle(cmd);
+        Emprestimo emprestimoAguardandoAprovacao = emprestimoService.handle(cmd);
         
         // Then
         assertTrue(Emprestimo.Situacao.AGUARDANDO_APROVACAO.equals(emprestimoAguardandoAprovacao.getSituacao()));    	    
@@ -144,10 +140,9 @@ public class EmprestimoTest {
         SolicitacaoAprovacaoEmprestimo cmd = SolicitacaoAprovacaoEmprestimo
                 .from(emprestimo, SolicitacaoAprovacaoEmprestimo.Situacao.APROVADA);
         
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        EmprestimoService emprestimoService = new EmprestimoService();
         
-        Emprestimo emprestimoAprovado = contaService.handle(cmd);
+        Emprestimo emprestimoAprovado = emprestimoService.handle(cmd);
     	
     	// Then
         assertNotNull(emprestimoAprovado);
@@ -177,10 +172,9 @@ public class EmprestimoTest {
         SolicitacaoAprovacaoEmprestimo cmd = SolicitacaoAprovacaoEmprestimo
                 .from(emprestimo, SolicitacaoAprovacaoEmprestimo.Situacao.RECUSADA);
         
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        EmprestimoService emprestimoService = new EmprestimoService();
         
-        Emprestimo emprestimoRecusado = contaService.handle(cmd);
+        Emprestimo emprestimoRecusado = emprestimoService.handle(cmd);
         
         // Then
         assertNotNull(emprestimoRecusado);

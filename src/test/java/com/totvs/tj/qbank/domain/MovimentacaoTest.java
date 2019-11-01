@@ -9,26 +9,20 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.totvs.tj.qbank.app.ContaService;
+import com.totvs.tj.qbank.app.MovimentoService;
 import com.totvs.tj.qbank.app.ResultadoVerificacaoSaldo;
 import com.totvs.tj.qbank.app.SaldoDentroLimite;
 import com.totvs.tj.qbank.app.SaldoExcedido;
-import com.totvs.tj.qbank.app.SolicitacaoAprovacaoEmprestimo;
 import com.totvs.tj.qbank.app.SolicitacaoAprovacaoGerente;
 import com.totvs.tj.qbank.app.SolicitacaoVerificacaoSaldo;
-import com.totvs.tj.qbank.app.SolicitacaoEmprestimo;
-import com.totvs.tj.qbank.app.SolicitacaoTransferencia;
+import com.totvs.tj.qbank.app.VerificacaoLimiteService;
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.conta.ContaId;
-import com.totvs.tj.qbank.domain.conta.ContaRepository;
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
-import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
-import com.totvs.tj.qbank.domain.movimentacao.EmprestimoId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
-import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
-import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
+import com.totvs.tj.qbank.domain.movimentacao.MovimentoRepository;
 
 public class MovimentacaoTest {
 
@@ -63,11 +57,10 @@ public class MovimentacaoTest {
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
 
         //When
-        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = service.handle(cmd);
 
         //Then      
         assertNotNull(estaNoLimite);
@@ -82,11 +75,10 @@ public class MovimentacaoTest {
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
 
         //When
-        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = service.handle(cmd);
 
         //Then      
         assertNotNull(estaNoLimite);
@@ -100,11 +92,10 @@ public class MovimentacaoTest {
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
 
         //When
-        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = service.handle(cmd);
 
         //Then
         assertNotNull(estaNoLimite);
@@ -123,11 +114,10 @@ public class MovimentacaoTest {
 
         SolicitacaoVerificacaoSaldo cmd = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
 
         //When
-        ResultadoVerificacaoSaldo estaNoLimite = contaService.handle(cmd);
+        ResultadoVerificacaoSaldo estaNoLimite = service.handle(cmd);
 
         //Then
         assertNotNull(estaNoLimite);
@@ -169,10 +159,10 @@ public class MovimentacaoTest {
         SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
                 .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.APROVADA);
 
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        MovimentoRepository movimentoRepository = new MovimentoRepositoryMock();
+        MovimentoService movimentoService = new MovimentoService(movimentoRepository);
 
-        Movimento movimentoAprovado = contaService.handle(aprovacaoGerente);
+        Movimento movimentoAprovado = movimentoService.handle(aprovacaoGerente);
 
         //Then
         assertNotNull(movimentoAprovado);
@@ -189,115 +179,29 @@ public class MovimentacaoTest {
         SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
                 .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.RECUSADA);
 
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
+        MovimentoRepository movimentoRepository = new MovimentoRepositoryMock();
+        MovimentoService movimentoService = new MovimentoService(movimentoRepository);
 
-        Movimento movimentoRecusado = contaService.handle(aprovacaoGerente);
+        Movimento movimentoRecusado = movimentoService.handle(aprovacaoGerente);
 
         //Then
         assertNotNull(movimentoRecusado);
         assertTrue(movimentoRecusado.isRecusado());
     }
+              
+    static class MovimentoRepositoryMock implements MovimentoRepository {
 
-    @Test
-    public void aoTransferirDeContaUmaParaOutraTest() {
-        //Given
-    	Empresa empresaSolicitada = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj("40121037000192")
-                .responsavel("30877250057")
-                .valorMercado(BigDecimal.valueOf(15000))
-                .quantidadeFuncionarios(2)
-                .build();
+        private final Map<MovimentoId, Movimento> movimentos = new LinkedHashMap<>();
         
-        Conta contaSolicitada = Conta.builder()
-                .id(ContaId.generate())
-                .empresa(empresaSolicitada)
-                .calcularLimite()
-                .build();
-    	
-        Movimento movimentoEntrada = Movimento.builder()
-                .id(MovimentoId.generate())
-                .tipoEntrada()
-                .conta(contaSolicitada)
-                .valor(movimentoSaida.getValor())
-                .build();
+		@Override
+		public void save(Movimento movimento) {
+			movimentos.put(movimento.getId(), movimento);			
+		}
 
-        Transferencia transferencia = Transferencia.builder()
-                .id(TransferenciaId.generate())
-                .credito(movimentoEntrada)
-                .debito(movimentoSaida)
-                .build();
-        
-        BigDecimal saldoSolicitanteAntigo = conta.getSaldo();
-        BigDecimal saldoSolicitadaAntigo = contaSolicitada.getSaldo();        
-        
-        //When
-        boolean transferido = transferencia.transferir();
-                
-        //Then
-        assertTrue(transferido);        
-        assertTrue(contaSolicitada.getSaldo().compareTo(saldoSolicitadaAntigo.add(transferencia.getValorCredito())) == 0);
-        assertTrue(conta.getSaldo().compareTo(saldoSolicitanteAntigo.subtract(transferencia.getValorDebito())) == 0);        
-    }
-    
-    @Test
-    public void aoSolicitarTransferenciaTest() {
-    	
-    	//Given
-    	Empresa empresaSolicitada = Empresa.builder()
-                .id(EmpresaId.generate())
-                .cnpj("40121037000192")
-                .responsavel("30877250057")
-                .valorMercado(BigDecimal.valueOf(15000))
-                .quantidadeFuncionarios(2)
-                .build();
-        
-        Conta contaSolicitada = Conta.builder()
-                .id(ContaId.generate())
-                .empresa(empresaSolicitada)
-                .calcularLimite()
-                .build();
-    	
-        Movimento movimentoEntrada = Movimento.builder()
-                .id(MovimentoId.generate())
-                .tipoEntrada()
-                .conta(contaSolicitada)
-                .valor(movimentoSaida.getValor())
-                .build();
-
-        Transferencia transferencia = Transferencia.builder()
-                .id(TransferenciaId.generate())
-                .credito(movimentoEntrada)
-                .debito(movimentoSaida)
-                .build();
-        
-        SolicitacaoTransferencia cmd = SolicitacaoTransferencia
-        		.from(transferencia);
-        
-        //When
-        ContaRepository contaRepository = new ContaRepositoryMock();
-        ContaService contaService = new ContaService(contaRepository);
-        
-        Transferencia transferenciaEfetuada = contaService.handle(cmd);
-        
-        //Then
-        assertTrue(Transferencia.Situacao.FINALIZADA.equals(transferenciaEfetuada.getSituacao()));    	
-    }
-           
-    static class ContaRepositoryMock implements ContaRepository {
-
-        private final Map<ContaId, Conta> contas = new LinkedHashMap<>();
-
-        @Override
-        public void save(Conta conta) {
-            contas.put(conta.getId(), conta);
-        }
-
-        @Override
-        public Conta getOne(ContaId id) {
-            return contas.get(id);
-        }
+		@Override
+		public Movimento getOne(MovimentoId id) {
+			return movimentos.get(id);
+		}
 
     }
 
