@@ -36,5 +36,24 @@ public class EmprestimoService {
 
 		return emprestimo;
 	}
+
+    public Emprestimo handle(SolicitacaoQuitacaoDivida cmd) throws Exception {
+        
+        Emprestimo emprestimo = cmd.getEmprestimo();
+        
+        SolicitacaoVerificacaoSaldo verificacaoSaldo = SolicitacaoVerificacaoSaldo.of(emprestimo.getMovimento());
+        
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
+
+        ResultadoVerificacaoSaldo resultado = service.handle(verificacaoSaldo);
+        
+        if(SaldoDentroLimite.class.equals(resultado.getClass())) {
+            emprestimo.quitar();
+        } else {
+            throw new Exception("Conta não apresenta saldo para quitar divida.");
+        }
+        
+        return emprestimo;
+    }
 	
 }
