@@ -184,18 +184,18 @@ public class CompraDividaTest {
 			.calcularLimite()
 			.build();
 	
-		contaSolicitada.debitar(BigDecimal.valueOf(3750));
+		contaSolicitada.debitar(BigDecimal.valueOf(1000));
 	
 		CompraDividaService compraDividaService = new CompraDividaService();
 	
 		// WHEN
 		SolicitacaoCompraDivida cmd = SolicitacaoCompraDivida.from(contaSolicitante, contaSolicitada);
-	
+	 
 		CompraDivida compraDivida = compraDividaService.handle(cmd);
 	
 		// THEN
 		assertNotNull(compraDivida);
-		assertTrue(CompraDivida.Situacao.INICIADA.equals(compraDivida.getSituacao()));
+		assertTrue(CompraDivida.Situacao.AGUARDANDO_APROVACAO_SOLICITADO.equals(compraDivida.getSituacao()));
     }
 
     @Test
@@ -255,7 +255,7 @@ public class CompraDividaTest {
 			.debito(movimentoSolicitante)
 			.build();
 	
-		CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.INICIADA);
+		CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
 	
 		// WHEN
 		boolean compraEfetuada = compraDivida.efetuar();
@@ -322,7 +322,7 @@ public class CompraDividaTest {
 			.debito(movimentoSolicitante)
 			.build();
 	
-		CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.INICIADA);
+		CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
 	
 		CompraDividaService compraDividaService = new CompraDividaService();
 	
@@ -334,6 +334,275 @@ public class CompraDividaTest {
 	
 		// THEN
 		assertTrue(CompraDivida.Situacao.APROVADA.equals(compraDividaAprovada.getSituacao()));
+    }
+    
+    @Test
+    public void aoSolicitarACompraDividaAEmpresaEndividadaDeveRecusarACompra() {
+        // GIVEN
+        Empresa empresaSolicitante = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("11057774000175")
+            .responsavel("23061790004")
+            .valorMercado(BigDecimal.valueOf(10000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitante = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitante)
+            .calcularLimite()
+            .build();
+    
+        Empresa empresaSolicitada = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("40121037000192")
+            .responsavel("30877250057")
+            .valorMercado(BigDecimal.valueOf(15000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitada = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitada)
+            .calcularLimite()
+            .build();
+    
+        contaSolicitada.debitar(BigDecimal.valueOf(3750));
+    
+        BigDecimal valorMovimentoSolicitada = contaSolicitada.getSaldo();
+        BigDecimal valorMovimentoSolicitante = contaSolicitada.getSaldo();
+    
+        Movimento movimentoSolicitante = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoSaida()
+            .conta(contaSolicitante)
+            .valor(valorMovimentoSolicitante.negate())
+            .build();
+    
+        Movimento movimentoSolicitada = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoEntrada()
+            .conta(contaSolicitada)
+            .valor(valorMovimentoSolicitada.negate())
+            .build();
+    
+        Transferencia transferencia = Transferencia.builder()
+            .id(TransferenciaId.generate())
+            .credito(movimentoSolicitada)
+            .debito(movimentoSolicitante)
+            .build();
+    
+        CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
+    
+        CompraDividaService compraDividaService = new CompraDividaService();
+    
+        // WHEN
+        SolicitarAprovacaoCompra cmd = SolicitarAprovacaoCompra.from(compraDivida,
+            SolicitarAprovacaoCompra.Situacao.RECUSADA);
+    
+        CompraDivida compraDividaAprovada = compraDividaService.handle(cmd);
+    
+        // THEN
+        assertTrue(CompraDivida.Situacao.RECUSADA.equals(compraDividaAprovada.getSituacao()));
+    }
+    
+    @Test
+    public void aoSolicitarACompraDividaComSaldoExcedidoDeveAguardarAprovacaoTest() {
+        // GIVEN
+        Empresa empresaSolicitante = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("11057774000175")
+            .responsavel("23061790004")
+            .valorMercado(BigDecimal.valueOf(10000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitante = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitante)
+            .calcularLimite()
+            .build();
+    
+        Empresa empresaSolicitada = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("40121037000192")
+            .responsavel("30877250057")
+            .valorMercado(BigDecimal.valueOf(15000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitada = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitada)
+            .calcularLimite()
+            .build();
+    
+        contaSolicitada.debitar(BigDecimal.valueOf(3750));
+    
+        BigDecimal valorMovimentoSolicitada = contaSolicitada.getSaldo();
+        BigDecimal valorMovimentoSolicitante = contaSolicitada.getSaldo();
+    
+        Movimento movimentoSolicitante = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoSaida()
+            .conta(contaSolicitante)
+            .valor(valorMovimentoSolicitante.negate())
+            .build();
+    
+        Movimento movimentoSolicitada = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoEntrada()
+            .conta(contaSolicitada)
+            .valor(valorMovimentoSolicitada.negate())
+            .build();
+    
+        Transferencia transferencia = Transferencia.builder()
+            .id(TransferenciaId.generate())
+            .credito(movimentoSolicitada)
+            .debito(movimentoSolicitante)
+            .build();
+    
+        // WHEN
+        SolicitacaoCompraDivida cmd = SolicitacaoCompraDivida.from(contaSolicitante, contaSolicitada);
+        
+        CompraDividaService compraDividaService = new CompraDividaService();
+        CompraDivida compraDivida = compraDividaService.handle(cmd);    
+    
+        // THEN
+        assertTrue(CompraDivida.Situacao.AGUARDANDO_LIBERACAO_MOVIMENTO.equals(compraDivida.getSituacao()));
+        assertTrue(Movimento.Situacao.AGUARDANDO_APROVACAO.equals(compraDivida.getSituacaoDebito()));
+    }
+    
+    @Test
+    public void aoAprovarMovimentoDaCompraDividaTest() {
+        // GIVEN
+        Empresa empresaSolicitante = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("11057774000175")
+            .responsavel("23061790004")
+            .valorMercado(BigDecimal.valueOf(10000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitante = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitante)
+            .calcularLimite()
+            .build();
+    
+        Empresa empresaSolicitada = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("40121037000192")
+            .responsavel("30877250057")
+            .valorMercado(BigDecimal.valueOf(15000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitada = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitada)
+            .calcularLimite()
+            .build();
+    
+        contaSolicitada.debitar(BigDecimal.valueOf(3750));
+    
+        BigDecimal valorMovimentoSolicitada = contaSolicitada.getSaldo();
+        BigDecimal valorMovimentoSolicitante = contaSolicitada.getSaldo();
+    
+        Movimento movimentoSolicitante = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoSaida()
+            .conta(contaSolicitante)
+            .valor(valorMovimentoSolicitante.negate())
+            .build();
+    
+        Movimento movimentoSolicitada = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoEntrada()
+            .conta(contaSolicitada)
+            .valor(valorMovimentoSolicitada.negate())
+            .build();
+        
+        Transferencia transferencia = Transferencia.builder()
+            .id(TransferenciaId.generate())
+            .credito(movimentoSolicitada)
+            .debito(movimentoSolicitante)
+            .build();
+    
+        // WHEN
+        CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_LIBERACAO_MOVIMENTO);
+        
+        compraDivida.aprovarMovimento();
+                
+        // THEN
+        assertTrue(CompraDivida.Situacao.AGUARDANDO_APROVACAO_SOLICITADO.equals(compraDivida.getSituacao()));
+        assertTrue(Movimento.Situacao.APROVADO.equals(compraDivida.getSituacaoDebito()));
+    }
+    
+    @Test
+    public void aoRecusarMovimentoDaCompraDividaTest() {
+        // GIVEN
+        Empresa empresaSolicitante = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("11057774000175")
+            .responsavel("23061790004")
+            .valorMercado(BigDecimal.valueOf(10000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitante = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitante)
+            .calcularLimite()
+            .build();
+    
+        Empresa empresaSolicitada = Empresa.builder()
+            .id(EmpresaId.generate())
+            .cnpj("40121037000192")
+            .responsavel("30877250057")
+            .valorMercado(BigDecimal.valueOf(15000))
+            .quantidadeFuncionarios(2)
+            .build();
+    
+        Conta contaSolicitada = Conta.builder()
+            .id(ContaId.generate())
+            .empresa(empresaSolicitada)
+            .calcularLimite()
+            .build();
+    
+        contaSolicitada.debitar(BigDecimal.valueOf(3750));
+    
+        BigDecimal valorMovimentoSolicitada = contaSolicitada.getSaldo();
+        BigDecimal valorMovimentoSolicitante = contaSolicitada.getSaldo();
+    
+        Movimento movimentoSolicitante = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoSaida()
+            .conta(contaSolicitante)
+            .valor(valorMovimentoSolicitante.negate())
+            .build();
+    
+        Movimento movimentoSolicitada = Movimento.builder()
+            .id(MovimentoId.generate())
+            .tipoEntrada()
+            .conta(contaSolicitada)
+            .valor(valorMovimentoSolicitada.negate())
+            .build();
+        
+        Transferencia transferencia = Transferencia.builder()
+            .id(TransferenciaId.generate())
+            .credito(movimentoSolicitada)
+            .debito(movimentoSolicitante)
+            .build();
+    
+        // WHEN
+        CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_LIBERACAO_MOVIMENTO);
+        
+        compraDivida.recusarMovimento();
+                
+        // THEN
+        assertTrue(CompraDivida.Situacao.RECUSADA.equals(compraDivida.getSituacao()));
+        assertTrue(Movimento.Situacao.RECUSADO.equals(compraDivida.getSituacaoDebito()));
     }
 
 }

@@ -12,10 +12,12 @@ public class SolicitarAprovacaoCompra {
     private Situacao situacao;
 
     public static enum Situacao {
-	INICIADA, APROVADA
+        INICIADA,
+        APROVADA,
+        RECUSADA
     }
 
     public boolean isAprovada() {
-	return Situacao.APROVADA.equals(this.situacao);
+        return Situacao.APROVADA.equals(this.situacao);
     }
 }

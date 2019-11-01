@@ -4,66 +4,64 @@ import java.math.BigDecimal;
 
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.movimentacao.CompraDivida;
-import com.totvs.tj.qbank.domain.movimentacao.CompraDividaId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
-import com.totvs.tj.qbank.domain.movimentacao.CompraDivida.Situacao;
 
 public class CompraDividaService {
-	
-	public Transferencia handle(SolicitacaoTransferencia cmd) {
 
-		Transferencia transferencia = cmd.getTransferencia();
+    public Transferencia handle(SolicitacaoTransferencia cmd) {
 
-		if (transferencia.transferir()) {
-			transferencia.finalizar();
-		}
+        Transferencia transferencia = cmd.getTransferencia();
 
-		return transferencia;
-	}
+        if (transferencia.transferir()) {
+            transferencia.finalizar();
+        }
 
-	public CompraDivida handle(SolicitacaoCompraDivida cmd) {
+        return transferencia;
+    }
 
-		Conta solicitada = cmd.getContaSolicitada();
-		Conta solicitante = cmd.getContaSolicitante();
+    public CompraDivida handle(SolicitacaoCompraDivida cmd) {
 
-		BigDecimal valorMovimento = solicitada.getSaldo();
+        Conta solicitada = cmd.getContaSolicitada();
+        Conta solicitante = cmd.getContaSolicitante();
 
-		Movimento movimentoSaida = Movimento.builder().id(MovimentoId.generate()).tipoSaida().conta(solicitante)
-				.valor(valorMovimento).build();
+        BigDecimal valorMovimento = solicitada.getSaldo().negate();
 
-		Movimento movimentoEntrada = Movimento.builder().id(MovimentoId.generate()).tipoEntrada().conta(solicitada)
-				.valor(valorMovimento).build();
+        Movimento movimentoSaida = Movimento.builder().id(MovimentoId.generate()).tipoSaida().conta(solicitante)
+                .valor(valorMovimento).build();
 
-		Transferencia transferencia = Transferencia.builder().id(TransferenciaId.generate()).credito(movimentoEntrada)
-				.debito(movimentoSaida).build();
+        Movimento movimentoEntrada = Movimento.builder().id(MovimentoId.generate()).tipoEntrada().conta(solicitada)
+                .valor(valorMovimento).build();
 
-		SolicitacaoVerificacaoSaldo solicitacaoVerificacoSaldo = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
-		
-		VerificacaoLimiteService service = new VerificacaoLimiteService();
-		
-		ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = service.handle(solicitacaoVerificacoSaldo);
+        Transferencia transferencia = Transferencia.builder().id(TransferenciaId.generate()).credito(movimentoEntrada)
+                .debito(movimentoSaida).build();
 
-		if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
-			return CompraDivida.from(transferencia);
-		}
+        SolicitacaoVerificacaoSaldo solicitacaoVerificacoSaldo = SolicitacaoVerificacaoSaldo.of(movimentoSaida);
 
-		return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.RECUSADA);
-	}
+        VerificacaoLimiteService service = new VerificacaoLimiteService();
 
-	public CompraDivida handle(SolicitarAprovacaoCompra cmd) {
+        ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = service.handle(solicitacaoVerificacoSaldo);
 
-		CompraDivida compraDivida = cmd.getCompraDivida();
+        if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
+            return CompraDivida.from(transferencia);
+        }
 
-		if (cmd.isAprovada()) {
-			compraDivida.aprovar();
-		} else {
-			compraDivida.recusar();
-		}
+        return CompraDivida.solicitarAprovacaoMovimento(transferencia);
+    }
 
-		return compraDivida;
-	}
-	
+    public CompraDivida handle(SolicitarAprovacaoCompra cmd) {
+
+        CompraDivida compraDivida = cmd.getCompraDivida();
+
+        if (cmd.isAprovada()) {
+            compraDivida.aprovar();
+        } else {
+            compraDivida.recusar();
+        }
+
+        return compraDivida;
+    }
+
 }
