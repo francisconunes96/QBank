@@ -4,12 +4,19 @@ import java.math.BigDecimal;
 
 import com.totvs.tj.qbank.domain.conta.Conta;
 import com.totvs.tj.qbank.domain.movimentacao.CompraDivida;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDividaRepository;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
 import com.totvs.tj.qbank.domain.movimentacao.TransferenciaId;
 
 public class CompraDividaService {
+    
+    private CompraDividaRepository repository;
+
+    public CompraDividaService (CompraDividaRepository repository) {
+        this.repository = repository;
+    }
 
     public Transferencia handle(SolicitacaoTransferencia cmd) {
 
@@ -21,7 +28,8 @@ public class CompraDividaService {
     }
 
     public CompraDivida handle(SolicitacaoCompraDivida cmd) {
-
+        
+        // TODO: Como fazer por id?
         Conta solicitada = cmd.getContaSolicitada();
         Conta solicitante = cmd.getContaSolicitante();
 
@@ -41,23 +49,31 @@ public class CompraDividaService {
         VerificacaoLimiteService service = new VerificacaoLimiteService();
 
         ResultadoVerificacaoSaldo resultadoVerificacaoSaldo = service.handle(solicitacaoVerificacoSaldo);
+        
+        CompraDivida compraDivida;
 
         if (SaldoDentroLimite.class.equals(resultadoVerificacaoSaldo.getClass())) {
-            return CompraDivida.from(transferencia);
+            compraDivida = CompraDivida.from(transferencia);
+        } else {
+            compraDivida = CompraDivida.solicitarAprovacaoMovimento(transferencia);
         }
+        
+        repository.save(compraDivida);                
 
-        return CompraDivida.solicitarAprovacaoMovimento(transferencia);
+        return compraDivida;
     }
 
     public CompraDivida handle(SolicitarAprovacaoCompra cmd) {
 
-        CompraDivida compraDivida = cmd.getCompraDivida();
+        CompraDivida compraDivida = repository.getOne(cmd.getCompraDividaId());
 
         if (cmd.isAprovada()) {
             compraDivida.aprovar();
         } else {
             compraDivida.recusar();
         }
+        
+        repository.save(compraDivida);
 
         return compraDivida;
     }

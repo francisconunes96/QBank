@@ -1,6 +1,6 @@
 package com.totvs.tj.qbank.app;
 
-import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
+import com.totvs.tj.qbank.domain.movimentacao.EmprestimoId;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor(staticName="from")
 public class SolicitacaoQuitacaoDivida {
     
-    private final Emprestimo emprestimo;
+    private final EmprestimoId emprestimoId;
 
 }

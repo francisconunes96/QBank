@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -18,6 +20,7 @@ import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.movimentacao.CompraDivida;
 import com.totvs.tj.qbank.domain.movimentacao.CompraDivida.Situacao;
 import com.totvs.tj.qbank.domain.movimentacao.CompraDividaId;
+import com.totvs.tj.qbank.domain.movimentacao.CompraDividaRepository;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 import com.totvs.tj.qbank.domain.movimentacao.Transferencia;
@@ -147,7 +150,8 @@ public class CompraDividaTest {
         		.from(transferencia);
         
         //When
-        CompraDividaService compraDividaService = new CompraDividaService();
+        CompraDividaRepository compraDividaRepository = new CompraDividaRepositoryMock();
+        CompraDividaService compraDividaService = new CompraDividaService(compraDividaRepository);
         
         Transferencia transferenciaEfetuada = compraDividaService.handle(cmd);
         
@@ -189,8 +193,8 @@ public class CompraDividaTest {
 	
 		contaSolicitada.debitar(BigDecimal.valueOf(1000));
 	
-		CompraDividaService compraDividaService = new CompraDividaService();
-	
+		CompraDividaRepository compraDividaRepository = new CompraDividaRepositoryMock();
+        CompraDividaService compraDividaService = new CompraDividaService(compraDividaRepository);	
 		// WHEN
 		SolicitacaoCompraDivida cmd = SolicitacaoCompraDivida.from(contaSolicitante, contaSolicitada);
 	 
@@ -330,10 +334,14 @@ public class CompraDividaTest {
 	
 		CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
 	
-		CompraDividaService compraDividaService = new CompraDividaService();
+		CompraDividaRepository compraDividaRepository = new CompraDividaRepositoryMock();
+        CompraDividaService compraDividaService = new CompraDividaService(compraDividaRepository);
 	
 		// WHEN
-		SolicitarAprovacaoCompra cmd = SolicitarAprovacaoCompra.from(compraDivida,
+        
+        compraDividaRepository.save(compraDivida);
+        
+		SolicitarAprovacaoCompra cmd = SolicitarAprovacaoCompra.from(compraDivida.getId(),
 			SolicitarAprovacaoCompra.Situacao.APROVADA);
 	
 		CompraDivida compraDividaAprovada = compraDividaService.handle(cmd);
@@ -402,16 +410,19 @@ public class CompraDividaTest {
     
         CompraDivida compraDivida = CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
     
-        CompraDividaService compraDividaService = new CompraDividaService();
+        CompraDividaRepository compraDividaRepository = new CompraDividaRepositoryMock();
+        CompraDividaService compraDividaService = new CompraDividaService(compraDividaRepository);
     
         // WHEN
-        SolicitarAprovacaoCompra cmd = SolicitarAprovacaoCompra.from(compraDivida,
+        compraDividaRepository.save(compraDivida);
+        
+        SolicitarAprovacaoCompra cmd = SolicitarAprovacaoCompra.from(compraDivida.getId(),
             SolicitarAprovacaoCompra.Situacao.RECUSADA);
     
-        CompraDivida compraDividaAprovada = compraDividaService.handle(cmd);
+        CompraDivida compraDividaRecusada = compraDividaService.handle(cmd);
     
         // THEN
-        assertTrue(CompraDivida.Situacao.RECUSADA.equals(compraDividaAprovada.getSituacao()));
+        assertTrue(CompraDivida.Situacao.RECUSADA.equals(compraDividaRecusada.getSituacao()));
     }
     
     @Test
@@ -450,7 +461,8 @@ public class CompraDividaTest {
         // WHEN
         SolicitacaoCompraDivida cmd = SolicitacaoCompraDivida.from(contaSolicitante, contaSolicitada);
         
-        CompraDividaService compraDividaService = new CompraDividaService();
+        CompraDividaRepository compraDividaRepository = new CompraDividaRepositoryMock();
+        CompraDividaService compraDividaService = new CompraDividaService(compraDividaRepository);
         CompraDivida compraDivida = compraDividaService.handle(cmd);    
     
         // THEN
@@ -594,4 +606,18 @@ public class CompraDividaTest {
         assertTrue(Movimento.Situacao.RECUSADO.equals(compraDivida.getSituacaoDebito()));
     }
 
+    static class CompraDividaRepositoryMock implements CompraDividaRepository {
+
+        private final Map<CompraDividaId, CompraDivida> comprasDivida = new LinkedHashMap<>();
+
+        @Override
+        public void save(CompraDivida compraDivida) {
+            comprasDivida.put(compraDivida.getId(), compraDivida);
+        }
+
+        @Override
+        public CompraDivida getOne(CompraDividaId id) {
+            return comprasDivida.get(id);
+        }
+    }
 }

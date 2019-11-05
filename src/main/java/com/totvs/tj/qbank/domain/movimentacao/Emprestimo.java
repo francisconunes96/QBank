@@ -44,7 +44,6 @@ public class Emprestimo {
 
     public boolean quitar() {
         this.situacao = Situacao.QUITADO;
-        this.getMovimento().aprovar();
         return true;
     }
 

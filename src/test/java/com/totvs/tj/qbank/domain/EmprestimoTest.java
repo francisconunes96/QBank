@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -17,6 +19,7 @@ import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.movimentacao.Emprestimo;
 import com.totvs.tj.qbank.domain.movimentacao.EmprestimoId;
+import com.totvs.tj.qbank.domain.movimentacao.EmprestimoRepository;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
 
@@ -42,26 +45,14 @@ public class EmprestimoTest {
     public void aoSolicitarEmprestimoDeveRealizarEmprestimoTest() {
 
         // Given
-        Movimento movimento = Movimento.builder()
-                .id(MovimentoId.generate())
-                .credito()
-                .emprestimo()
-                .conta(conta)
-                .valor(BigDecimal.valueOf(1000))
-                .build();
-
-        Emprestimo emprestimo = Emprestimo.builder()
-                .id(EmprestimoId.generate())
-                .movimento(movimento)
-                .build();
-
         BigDecimal saldoAntigo = conta.getSaldo();
 
         // When
-        SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(emprestimo);
+        SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(BigDecimal.valueOf(1000), conta);
 
-        EmprestimoService emprestimoService = new EmprestimoService();
-
+        EmprestimoRepository emprestimoRepository = new EmprestimoRepositoryMock();
+        EmprestimoService emprestimoService = new EmprestimoService(emprestimoRepository);
+        
         Emprestimo emprestimoEfetuado = emprestimoService.handle(cmd);
 
         // Then
@@ -73,24 +64,11 @@ public class EmprestimoTest {
     @Test
     public void aoSolicitarEmprestimoDeveAguardarAprovacaoGerenteTest() {
 
-        // Given
-        Movimento movimento = Movimento.builder()
-                .id(MovimentoId.generate())
-                .credito()
-                .emprestimo()
-                .conta(conta)
-                .valor(BigDecimal.valueOf(2500))
-                .build();
-
-        Emprestimo emprestimo = Emprestimo.builder()
-                .id(EmprestimoId.generate())
-                .movimento(movimento)
-                .build();
-
         // When
-        SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(emprestimo);
+        SolicitacaoEmprestimo cmd = SolicitacaoEmprestimo.from(BigDecimal.valueOf(2500),conta);
 
-        EmprestimoService emprestimoService = new EmprestimoService();
+        EmprestimoRepository emprestimoRepository = new EmprestimoRepositoryMock();
+        EmprestimoService emprestimoService = new EmprestimoService(emprestimoRepository);
 
         Emprestimo emprestimoAguardandoAprovacao = emprestimoService.handle(cmd);
 
@@ -118,10 +96,14 @@ public class EmprestimoTest {
         emprestimo.aguardarAprovacao();
 
         //When
+        EmprestimoRepository emprestimoRepository = new EmprestimoRepositoryMock();
+        
+        emprestimoRepository.save(emprestimo);
+        
         SolicitacaoAprovacaoEmprestimo cmd = SolicitacaoAprovacaoEmprestimo
-                .from(emprestimo, SolicitacaoAprovacaoEmprestimo.Situacao.APROVADA);
-
-        EmprestimoService emprestimoService = new EmprestimoService();
+                .from(emprestimo.getId(), SolicitacaoAprovacaoEmprestimo.Situacao.APROVADA);
+        
+        EmprestimoService emprestimoService = new EmprestimoService(emprestimoRepository);;
 
         Emprestimo emprestimoAprovado = emprestimoService.handle(cmd);
 
@@ -151,10 +133,14 @@ public class EmprestimoTest {
         emprestimo.aguardarAprovacao();
 
         // When
+        EmprestimoRepository emprestimoRepository = new EmprestimoRepositoryMock();
+        
+        emprestimoRepository.save(emprestimo);
+        
         SolicitacaoAprovacaoEmprestimo cmd = SolicitacaoAprovacaoEmprestimo
-                .from(emprestimo, SolicitacaoAprovacaoEmprestimo.Situacao.RECUSADA);
-
-        EmprestimoService emprestimoService = new EmprestimoService();
+                .from(emprestimo.getId(), SolicitacaoAprovacaoEmprestimo.Situacao.RECUSADA);
+        
+        EmprestimoService emprestimoService = new EmprestimoService(emprestimoRepository);
 
         Emprestimo emprestimoRecusado = emprestimoService.handle(cmd);
 
@@ -207,11 +193,14 @@ public class EmprestimoTest {
                 .build();
 
         //When
+        EmprestimoRepository emprestimoRepository = new EmprestimoRepositoryMock();
+        
+        emprestimoRepository.save(emprestimo);
+        
         SolicitacaoQuitacaoDivida cmd = SolicitacaoQuitacaoDivida
-                .from(emprestimo);
-
-        EmprestimoService emprestimoService = new EmprestimoService();
-
+                .from(emprestimo.getId());
+        
+        EmprestimoService emprestimoService = new EmprestimoService(emprestimoRepository);
         Emprestimo emprestimoQuitado = emprestimoService.handle(cmd);
 
         //Then
@@ -237,13 +226,31 @@ public class EmprestimoTest {
                 .build();
 
         //When
+        EmprestimoRepository emprestimoRepository = new EmprestimoRepositoryMock();
+        
+        emprestimoRepository.save(emprestimo);
+        
         SolicitacaoQuitacaoDivida cmd = SolicitacaoQuitacaoDivida
-                .from(emprestimo);
-
-        EmprestimoService emprestimoService = new EmprestimoService();
+                .from(emprestimo.getId());
+        
+        EmprestimoService emprestimoService = new EmprestimoService(emprestimoRepository);
 
         emprestimoService.handle(cmd);
 
     }
 
+    static class EmprestimoRepositoryMock implements EmprestimoRepository {
+
+        private final Map<EmprestimoId, Emprestimo> emprestimos = new LinkedHashMap<>();
+
+        @Override
+        public void save(Emprestimo emprestimo) {
+            emprestimos.put(emprestimo.getId(), emprestimo);
+        }
+
+        @Override
+        public Emprestimo getOne(EmprestimoId id) {
+            return emprestimos.get(id);
+        }
+    }
 }

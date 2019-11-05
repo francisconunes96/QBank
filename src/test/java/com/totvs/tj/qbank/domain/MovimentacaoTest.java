@@ -4,8 +4,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -22,7 +20,6 @@ import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 import com.totvs.tj.qbank.domain.movimentacao.Movimento;
 import com.totvs.tj.qbank.domain.movimentacao.MovimentoId;
-import com.totvs.tj.qbank.domain.movimentacao.MovimentoRepository;
 
 public class MovimentacaoTest {
 
@@ -185,9 +182,8 @@ public class MovimentacaoTest {
         //When
         SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
                 .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.APROVADA);
-
-        MovimentoRepository movimentoRepository = new MovimentoRepositoryMock();
-        MovimentoService movimentoService = new MovimentoService(movimentoRepository);
+        
+        MovimentoService movimentoService = new MovimentoService();
 
         Movimento movimentoAprovado = movimentoService.handle(aprovacaoGerente);
 
@@ -206,30 +202,13 @@ public class MovimentacaoTest {
         SolicitacaoAprovacaoGerente aprovacaoGerente = SolicitacaoAprovacaoGerente
                 .from(resultadoEvt, SolicitacaoAprovacaoGerente.Situacao.RECUSADA);
 
-        MovimentoRepository movimentoRepository = new MovimentoRepositoryMock();
-        MovimentoService movimentoService = new MovimentoService(movimentoRepository);
+        MovimentoService movimentoService = new MovimentoService();
 
         Movimento movimentoRecusado = movimentoService.handle(aprovacaoGerente);
 
         //Then
         assertNotNull(movimentoRecusado);
         assertTrue(movimentoRecusado.isRecusado());
-    }
-
-    static class MovimentoRepositoryMock implements MovimentoRepository {
-
-        private final Map<MovimentoId, Movimento> movimentos = new LinkedHashMap<>();
-
-        @Override
-        public void save(Movimento movimento) {
-            movimentos.put(movimento.getId(), movimento);
-        }
-
-        @Override
-        public Movimento getOne(MovimentoId id) {
-            return movimentos.get(id);
-        }
-
     }
 
 }

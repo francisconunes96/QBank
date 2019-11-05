@@ -7,8 +7,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(staticName="from")
-public class QuitarDivida {
+public class QuitarEmprestimo {
     
-    private final EmprestimoId Emprestimo;
+    private final EmprestimoId emprestimoId;
 
 }
