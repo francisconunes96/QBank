@@ -2,6 +2,9 @@ package com.totvs.tj.qbank.domain.conta;
 
 import java.math.BigDecimal;
 
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 
@@ -10,8 +13,11 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Entity
 public class Conta {
     private static final BigDecimal VINTE_CINCO_PORCENTO = BigDecimal.valueOf(25).divide(BigDecimal.valueOf(100));
+    
+    @EmbeddedId
     private final ContaId id;
     private final EmpresaId empresa;
     private BigDecimal saldo;

@@ -2,15 +2,23 @@ package com.totvs.tj.qbank.domain.movimentacao;
 
 import java.math.BigDecimal;
 
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Entity
 public class Transferencia {
 
+    @EmbeddedId
 	private final TransferenciaId id;
+    @OneToOne
 	private final Movimento credito;
+    @OneToOne
 	private final Movimento debito;
 	private Situacao situacao;
 

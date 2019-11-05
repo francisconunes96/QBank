@@ -2,6 +2,10 @@ package com.totvs.tj.qbank.domain.movimentacao;
 
 import java.math.BigDecimal;
 
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+
 import com.totvs.tj.qbank.domain.conta.Conta;
 
 import lombok.AllArgsConstructor;
@@ -9,10 +13,13 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Entity
 public class Movimento {
-
+    
+    @EmbeddedId
     private final MovimentoId id;
     private final BigDecimal valor;
+    @ManyToOne
     private final Conta conta;
     private final Tipo tipo;
     private final Origem origem;

@@ -1,13 +1,20 @@
 package com.totvs.tj.qbank.domain.movimentacao;
 
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.OneToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(staticName = "from")
+@Entity
 public class CompraDivida {
-
+    
+    @EmbeddedId
     private CompraDividaId id;
+    @OneToOne
     private Transferencia transferencia;
     private Situacao situacao;
 
