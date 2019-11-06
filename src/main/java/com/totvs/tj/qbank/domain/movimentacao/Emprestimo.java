@@ -1,23 +1,33 @@
 package com.totvs.tj.qbank.domain.movimentacao;
 
+import static javax.persistence.EnumType.STRING;
+import static javax.persistence.FetchType.LAZY;
+import static lombok.AccessLevel.PRIVATE;
+
 import java.math.BigDecimal;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = PRIVATE, force = true)
 @AllArgsConstructor
 @Entity
 public class Emprestimo {
     
     @EmbeddedId
     private final EmprestimoId id;
-    @OneToOne
+    
+    @OneToOne(fetch = LAZY, optional = false)
     private final Movimento movimento;
+    
+    @Enumerated(STRING)
     private Situacao situacao;
 
     public static Builder builder() {

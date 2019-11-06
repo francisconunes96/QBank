@@ -1,9 +1,9 @@
 spring:
-  
+    
   h2:
     console:
       enabled: true
-      
+            
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:db_tcc;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE;
@@ -12,11 +12,20 @@ spring:
     
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
+    show-sql: true
     hibernate:
       naming:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
-    properties:      
+    properties: 
+#      javax:
+#        persistence:
+#          schema-generation:
+#            create-source: metadata
+#            scripts:
+#              action: create
+#              create-target: src\main\resources\db\migration\V1.0__initilize.sql         
       hibernate:
         show-sql: true
         format_sql: true

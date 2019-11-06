@@ -1,21 +1,31 @@
 package com.totvs.tj.qbank.domain.movimentacao;
 
-import javax.persistence.EmbeddedId;
+import static javax.persistence.EnumType.STRING;
+import static javax.persistence.FetchType.LAZY;
+import static lombok.AccessLevel.PRIVATE;
+
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = PRIVATE, force = true)
 @AllArgsConstructor(staticName = "from")
 @Entity
 public class CompraDivida {
-    
-    @EmbeddedId
+
+    @Id
     private CompraDividaId id;
-    @OneToOne
+    
+    @OneToOne(fetch = LAZY, optional = false)
     private Transferencia transferencia;
+
+    @Enumerated(STRING)
     private Situacao situacao;
 
     public static enum Situacao {
@@ -24,7 +34,7 @@ public class CompraDivida {
         AGUARDANDO_APROVACAO_SOLICITADO,
         AGUARDANDO_LIBERACAO_MOVIMENTO
     }
-    
+
     public static CompraDivida from(Transferencia transferencia) {
         return CompraDivida.from(CompraDividaId.generate(), transferencia, Situacao.AGUARDANDO_APROVACAO_SOLICITADO);
     }
@@ -36,12 +46,12 @@ public class CompraDivida {
     public void aprovar() {
         this.situacao = Situacao.APROVADA;
     }
-    
+
     public void aprovarMovimento() {
         transferencia.getDebito().aprovar();
         this.situacao = Situacao.AGUARDANDO_APROVACAO_SOLICITADO;
     }
-    
+
     public void recusarMovimento() {
         transferencia.getDebito().recusar();
         this.recusar();

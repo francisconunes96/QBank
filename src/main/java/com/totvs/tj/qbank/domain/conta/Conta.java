@@ -1,28 +1,43 @@
 package com.totvs.tj.qbank.domain.conta;
 
+import static javax.persistence.EnumType.STRING;
+import static lombok.AccessLevel.PRIVATE;
+
 import java.math.BigDecimal;
 
-import javax.persistence.EmbeddedId;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
 
 import com.totvs.tj.qbank.domain.empresa.Empresa;
 import com.totvs.tj.qbank.domain.empresa.EmpresaId;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = PRIVATE, force = true)
 @AllArgsConstructor
+
 @Entity
 public class Conta {
     private static final BigDecimal VINTE_CINCO_PORCENTO = BigDecimal.valueOf(25).divide(BigDecimal.valueOf(100));
     
-    @EmbeddedId
+    @Id
     private final ContaId id;
-    private final EmpresaId empresa;
+    
+    @Embedded
+    private final EmpresaId empresa;    
+    
     private BigDecimal saldo;
     private BigDecimal limite;
+    
+    @Enumerated(STRING)
     private LimiteEmergencial solicitouLimiteEmergencial;
+    
+    @Enumerated(STRING)
     private Situacao situacao;
 
     public boolean aumentarLimite() {

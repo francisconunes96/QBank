@@ -1,25 +1,35 @@
 package com.totvs.tj.qbank.domain.movimentacao;
 
+import static javax.persistence.EnumType.STRING;
+import static lombok.AccessLevel.PRIVATE;
+
 import java.math.BigDecimal;
 
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = PRIVATE, force = true)
 @AllArgsConstructor
 @Entity
 public class Transferencia {
 
-    @EmbeddedId
+    @Id
 	private final TransferenciaId id;
+    
     @OneToOne
 	private final Movimento credito;
+    
     @OneToOne
 	private final Movimento debito;
+    
+    @Enumerated(STRING)
 	private Situacao situacao;
 
 	public static Builder builder() {

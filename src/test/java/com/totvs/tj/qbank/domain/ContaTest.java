@@ -48,10 +48,10 @@ public class ContaTest {
                 empresa.getValorMercado().divide(BigDecimal.valueOf(empresa.getQuantidadeFuncionarios())));
 
     }
-    
+
     @Test
     public void aoAbrirContaComLimiteMaiorQueOPermitidoTest() {
-      //Given        
+        //Given        
         Empresa empresa = Empresa.builder()
                 .id(EmpresaId.generate())
                 .cnpj("11057774000175")
@@ -66,7 +66,7 @@ public class ContaTest {
                 .empresa(empresa)
                 .calcularLimite()
                 .build();
-        
+
         //Then
         assertTrue(conta.getLimite().equals(BigDecimal.valueOf(15000)));
     }
@@ -118,7 +118,7 @@ public class ContaTest {
                 .build();
 
         BigDecimal limiteAntigo = conta.getLimite();
-        
+
         SolicitacaoAumentoLimiteEmergencial cmd = SolicitacaoAumentoLimiteEmergencial.from(idConta);
 
         ContaRepository repository = new ContaRepositoryMock();
@@ -128,14 +128,14 @@ public class ContaTest {
 
         // WHEN
         service.handle(cmd);
-        
+
         // THEN
         assertTrue(repository.getOne(idConta).getLimite().equals(limiteAntigo.add(limiteAntigo.divide(BigDecimal.valueOf(2)))));
     }
-    
+
     @Test(expected = Exception.class)
     public void aoSolicitarAumentoLimiteEmergencialMaisDeUmaVezDeveSerNegadoTest() throws Exception {
-        
+
         //GIVEN
         ContaId idConta = ContaId.generate();
 
@@ -152,7 +152,7 @@ public class ContaTest {
                 .empresa(empresa)
                 .calcularLimite()
                 .build();
-        
+
         SolicitacaoAumentoLimiteEmergencial cmd = SolicitacaoAumentoLimiteEmergencial.from(idConta);
 
         ContaRepository repository = new ContaRepositoryMock();
@@ -163,12 +163,12 @@ public class ContaTest {
 
         // WHEN
         SolicitacaoAumentoLimiteEmergencial cmdSegundaVez = SolicitacaoAumentoLimiteEmergencial.from(idConta);
-        service.handle(cmdSegundaVez);        
-    }   
-    
+        service.handle(cmdSegundaVez);
+    }
+
     @Test
     public void aoSuspenderContaExistenteTest() {
-        
+
         //GIVEN        
         ContaId idConta = ContaId.generate();
 
@@ -184,18 +184,18 @@ public class ContaTest {
                 .id(idConta)
                 .empresa(empresa)
                 .calcularLimite()
-                .build();        
-        
+                .build();
+
         SuspenderConta cmd = SuspenderConta.from(idConta);
-        
+
         ContaRepository repository = new ContaRepositoryMock();
         ContaService service = new ContaService(repository);
 
         repository.save(conta);
-        
+
         //WHEN
         service.handle(cmd);
-        
+
         //THEN
         assertFalse(repository.getOne(idConta).isDisponivel());
     }

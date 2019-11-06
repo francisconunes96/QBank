@@ -1,17 +1,23 @@
 package com.totvs.tj.qbank.domain.movimentacao;
 
+import static javax.persistence.EnumType.STRING;
+import static lombok.AccessLevel.PRIVATE;
+
 import java.math.BigDecimal;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 
 import com.totvs.tj.qbank.domain.conta.Conta;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor(access = PRIVATE, force = true)
 @AllArgsConstructor
 @Entity
 public class Movimento {
@@ -19,10 +25,17 @@ public class Movimento {
     @EmbeddedId
     private final MovimentoId id;
     private final BigDecimal valor;
+    
     @ManyToOne
     private final Conta conta;
+    
+    @Enumerated(STRING)
     private final Tipo tipo;
+    
+    @Enumerated(STRING)
     private final Origem origem;
+    
+    @Enumerated(STRING)
     private Situacao situacao;
 
     public static Builder builder() {
